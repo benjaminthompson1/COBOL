@@ -4,6 +4,7 @@
       *
       * Module 12 - Mid Term Exam
       *
+      *
        ENVIRONMENT DIVISION.
        INPUT-OUTPUT SECTION.
        FILE-CONTROL.
