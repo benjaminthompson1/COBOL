@@ -1,4 +1,4 @@
-       IDENTIFICATION DIVISION.                                                 
+       IDENTIFICATION DIVISION..                                                 
        PROGRAM-ID. CHARFUNC.                                                    
        DATA DIVISION.                                                           
        WORKING-STORAGE SECTION.                                                 
