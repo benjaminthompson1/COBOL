@@ -1,0 +1,40 @@
+000005 IDENTIFICATION DIVISION.                                                 
+000006 PROGRAM-ID. INTRDATE.                                                    
+000015 DATA DIVISION.                                                           
+000016 WORKING-STORAGE  SECTION.                                                
+000017 01 DATE-VARS.                                                            
+000018     05 CURRENT-YEAR      PIC X(4).                                       
+000019     05 CURRENT-MON       PIC X(2).                                       
+000020     05 CURRENT-DAY       PIC X(2).                                       
+000021     05 CURRENT-HOUR      PIC X(2).                                       
+000022     05 CURRENT-MIN       PIC X(2).                                       
+000023     05 CURRENT-SEC       PIC X(2).                                       
+000024     05 CURRENT-MSEC      PIC X(2).                                       
+000025     05 LOCAL-TIME.                                                       
+000026       10 TIME-DIF     PIC X(1).                                          
+000027       10 TIME-DIF-H   PIC X(2).                                          
+000028       10 TIME-DIF-M   PIC X(2).                                          
+000029 01 CURRENT-WEEK-DAY   PIC 9(1).                                          
+000030 01 WEEKDAYS-TABLE.                                                       
+000031     05                PIC X(9) VALUE "Monday".                           
+000032     05                PIC X(9) VALUE "Tuesday".                          
+000033     05                PIC X(9) VALUE "Wednesday".                        
+000034     05                PIC X(9) VALUE "Thursday".                         
+000035     05                PIC X(9) VALUE "Friday".                           
+000036     05                PIC X(9) VALUE "Saturday".                         
+000037     05                PIC X(9) VALUE "Sunday".                           
+000038 01               REDEFINES WEEKDAYS-TABLE.                               
+000039     05 DT-OF-WK            OCCURS 7 TIMES PIC X(9).                      
+000040 PROCEDURE DIVISION.                                                      
+000041     MOVE FUNCTION CURRENT-DATE TO DATE-VARS.                             
+000042     ACCEPT CURRENT-WEEK-DAY FROM DAY-OF-WEEK.                            
+000044     DISPLAY "Date: Year " CURRENT-YEAR  " Month " CURRENT-MON            
+000045         " Day " CURRENT-DAY "(" DT-OF-WK(CURRENT-WEEK-DAY) ")".          
+000047     DISPLAY "Time: Hour " CURRENT-HOUR  " Minute " CURRENT-MIN           
+000048         " Second " CURRENT-SEC "." CURRENT-MSEC.                         
+000050     IF LOCAL-TIME NOT = 0 THEN                                           
+000051     DISPLAY "Time difference with Greenwich mean time for this"          
+000052-            "zone: "                                                     
+000053             TIME-DIF TIME-DIF-H " Hours " TIME-DIF-M " Minutes"          
+000054     END-IF.                                                              
+000055     GOBACK.                                                              

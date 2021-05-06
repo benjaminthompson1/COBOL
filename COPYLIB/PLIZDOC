@@ -1,0 +1,176 @@
+ /*##################################################################*/ 00010000
+ /*      DOCUMENT FILE RECORD LAYOUT (ZDOC)      10/01/89  FR795     */ 00020000
+ /*                                                                  */ 00030000
+ /*  IMPORTANT: (IF RECORD LAYOUT IS CHANGED PLEASE CHECK ZDOCH)     */ 00040000
+ /*##################################################################*/ 00050000
+                                                                        00060000
+ DCL 1 ZDOC_RECORD,                                                     00070000
+                                                                        00121003
+     3 ZDOC_FIXED_AREA,                                                 00122003
+                                                                        00123003
+       5 ZDOC_KEY,                                                      00124003
+         7 ZDOC_DOC_TYPE                    CHAR (1),    /* OBFDCIU */  00125003
+         7 ZDOC_DOC_NUMBER                  CHAR (9),                   00126003
+                                                                        00127003
+       5 ZDOC_DOCUMENT_STATUS,                                          00128003
+         7 ZDOC_DOC_STATUS                  CHAR (1),                   00129003
+         7 ZDOC_STATUS_CHANGED_DATE         FIXED DEC (7), /* CYYMMDD */00129103
+         7 ZDOC_STATUS_CHANGED_OPID         CHAR (4),                   00129203
+         7 ZDOC_STATUS_CHANGED_OFFICE       CHAR (4),                   00129303
+                                                                        00129403
+       5 ZDOC_ORIGINAL_HOLDER,                                          00129503
+         7 ZDOC_HOLDER_PID                  BIT  (32),                  00129603
+         7 ZDOC_HOLDER_PIDE                 CHAR (1),                   00129703
+                                                                        00129803
+       5 ZDOC_ISSUE_DETAILS,                                            00129903
+         7 ZDOC_ISSUE_DATE                  FIXED DEC (7), /* CYYMMDD */00130003
+         7 ZDOC_ISSUE_OPID                  CHAR (4),                   00130103
+         7 ZDOC_ISSUE_OFFICE                CHAR (4),                   00130203
+         7 ZDOC_RECORDING_OFFICE            CHAR (4),                   00130303
+         7 ZDOC_APPROVE_OPID                CHAR (4),                   00130403
+         7 ZDOC_ORIGINAL_EXPIRY_DATE        FIXED DEC (7), /* CYYMMDD */00130503
+         7 ZDOC_LATEST_EXPIRY_DATE          FIXED DEC (7), /* CYYMMDD */00130603
+         7 ZDOC_CATEGORY                    CHAR (1),                   00130703
+ /* ANYTHING BATCHED VIA 'BCASH' HAS 'C' FOR COUNTER, ANYTHING FROM  */ 00130803
+ /* ECS HAS 'P' FOR POST OFFICE. 'CREATE' HAS BEEN UNAVAILABLE TO    */ 00130903
+ /* AUSTRALIAN OFFICES SINCE THE INTRODUCTION OF FR1916.             */ 00131003
+         7 ZDOC_PAYMENT_METHOD              CHAR (1),                   00131103
+         7 ZDOC_ARCHIVE_BOX_NUMBER          FIXED DEC (5), /* FR575 */  00131203
+                                                                        00131303
+       5 ZDOC_FLAGS                         UNALIGNED,     /* FLAGS */  00131403
+                                                                        00131503
+         7 ZDOC_GENERAL_FLAGS,                                          00131603
+           9 ZDOC_IMPOUND                   BIT (1),                    00131703
+                /* SET IF DOCUMENT IS TO BE IMPOUNDED ON SIGHT */       00131803
+           9 ZDOC_RESTRICTED                BIT (1),                    00131903
+                /* SET IF EXPIRY DATE IS RESTRICTED            */       00132003
+           9 ZDOC_URGENT_ISSUE              BIT (1),                    00132103
+                /* SET IF DOCUMENT WAS ISSUED URGENTLY         */       00132203
+           9 ZDOC_DUTY_ISSUE                BIT (1),                    00132303
+                /* SET IF DOCUMENT WAS ISSUED USING 'DUTY'     */       00132403
+                /* FUNCTION                                    */       00132503
+           9 ZDOC_REPLACEMENT_ISSUE         BIT (1),                    00132603
+                /* SET IF DOCUMENT WAS ISSUED AS A REPLACEMENT */       00132703
+           9 ZDOC_MACHINE_PRINTED           BIT (1),                    00132803
+                /* SET IF DOCUMENT WAS MACHINE PRINTED ONLINE  */       00132903
+           9 ZDOC_DOC_DESTROYED             BIT (1),                    00133003
+                /* SET IF 'X' STATUS DOC HAS BEEN DESTROYED    */       00133103
+           9 ZDOC_APPLICATION_TRANSFERRED   BIT (1),                    00133203
+                /* IF SET, ZDOC_RECORDING_OFFICE CONTAINS THE  */       00133303
+                /* LODGEMENT OFFICE                            */       00133403
+                                                                        00133503
+         7 ZDOC_INVESTIGATION_FLAGS,                  /* FR437 */       00133603
+           9 ZDOC_INV_BY_INVO               BIT (1),                    00133703
+                /* SET IF APPLICATION WAS INVESTIGATED BY AN   */       00133803
+                /* INVESTIGATING OFFICER                       */       00133903
+           9 ZDOC_INV_BY_AUTH_ONLY          BIT (1),                    00134003
+                /* SET IF APPLICATION WAS INVESTIGATED BY AN   */       00134103
+                /* AUTHORISING OFFICER ONLY                    */       00134203
+           9 ZDOC_APP_EROLL_CHECKED         BIT (1),                    00134303
+           9 ZDOC_CRA_EROLL_CHECKED         BIT (1),                    00134403
+           9 ZDOC_APP_EROLL_FOUND_MANUAL    BIT (1),                    00134503
+           9 ZDOC_APP_EROLL_FOUND_AUTO      BIT (1),                    00134603
+           9 ZDOC_CRA_EROLL_FOUND           BIT (1),                    00134703
+           9 ZDOC_APP_FPER_CHECKED          BIT (1),                    00134803
+           9 ZDOC_CRA_FPER_CHECKED          BIT (1),                    00134903
+           9 ZDOC_APP_FPER_FOUND            BIT (1),                    00135003
+           9 ZDOC_CRA_FPER_FOUND            BIT (1),                    00135103
+                /* ABOVE FLAGS SET AS RESULT OF INVESTIGATION  */       00135203
+                                                                        00135303
+         7 ZDOC_REMINDER_BATCH_CREATED      BIT (1),                    00135403
+                /* BATCH HAS BEEN CREATED USING FORM NUMBER FR1617 */   00135503
+         7 ZDOC_ENDORSEMENTS                BIT (1),                    00135603
+                /* ENDORSEMENTS ARE ON RECORD LAYOUT ZDOCX1A   */       00135703
+         7 ZDOC_FREE_FORMAT_NARR_EXISTS     BIT (1),                    00135803
+                /* FREE FORMAT NARRATIVE IS ON RECORD LAYOUT ZDOCX1B  */00135903
+         7 ZDOC_NARRATIVE_EXISTS            BIT (1),                    00136003
+                                                                        00136103
+         7 ZDOC_PRINT_COB_SPECIFIED         BIT (1),                    00136203
+         7 ZDOC_COB_PRINTED                 BIT (1),                    00136303
+                                                                        00136403
+         7 ZDOC_PHOTOGRAPH_PRINTED          BIT (1),       /* FR1045 */ 00136503
+         7 ZDOC_SIGNATURE_PRINTED           BIT (1),       /* FR1045 */ 00136603
+         7 ZDOC_UNABLE_TO_SIGN              BIT (1),       /* FR1045 */ 00136703
+         7 ZDOC_REMINDER_CARD_SENT          BIT (1),       /* FR1434 */ 00136803
+                                                                        00136903
+         7 ZDOC_READ_SUCCESSFUL             BIT (1),       /* FR1482 */ 00137003
+         7 ZDOC_READ_FAILED                 BIT (1),       /* FR1482 */ 00137103
+                                                                        00137203
+         7 ZDOC_ALERT_FORCED_DURING_ISSUE   BIT (1),       /* FR1077 */ 00137303
+                                                                        00137403
+       5 ZDOC_BATCH                         FIXED DEC (7),              00137503
+                                                                        00137603
+       5 ZDOC_VERSION_NO                    PIC '9',                    00137703
+                    /* THIS FIELD IS CHECKED PRIOR TO UPDATING THE    */00137803
+                    /* RECORD AND MUST BE INCREMENTED EVERY TIME THE  */00137903
+                    /* RECORD IS UPDATED.                             */00138003
+                                                                        00138103
+                                                                        00138203
+     3 ZDOC_COMPRESSED_AREA,                                            00138303
+                                                                        00138403
+       5 ZDOC_SOURCE                        CHAR (1),        /* FR908 */00138503
+                                                                        00138603
+       5 ZDOC_POST_OFFICE_ID                CHAR (6),       /* FR1000 */00138703
+       5 ZDOC_PO_PAYMENT_DATE               CHAR (7),       /* FR1000 */00138803
+                     /* THIS FIELD WILL ALSO BE USED TO STORE LODGE-  */00138903
+                     /* MENT DATE FOR OFFICIAL AND DIP PASSPORTS 1571 */00139003
+       5 ZDOC_PO_PAYMENT_AMOUNT             CHAR (3),       /* FR1000 */00139103
+                     /* THIS FIELD WILL ALSO BE USED TO STORE FEE FOR */00139203
+                     /* OFFICIAL AND DIPLOMATIC PASSPORTS      FR1571 */00139303
+                                                                        00139403
+       5 ZDOC_COLLECTION_DETAILS,                                       00139503
+          7 ZDOC_DATE_COLLECTED             FIXED DEC (7),  /* FR1115 */00139603
+          7 ZDOC_COLLECTOR_REL_TO_APP       CHAR (2),       /* FR1115 */00139703
+                                                                        00139803
+       5 ZDOC_SPONSORING_AUTHORITY          CHAR (3),       /* FR1116 */00139903
+                                                                        00140003
+       5 ZDOC_CELL                          CHAR (1),       /* FR1074 */00140103
+                                                                        00140203
+       5 ZDOC_GRATIS_ISSUE_REASON           CHAR (1),       /* FR1523 */00140303
+                                                                        00140403
+       5 ZDOC_POI_CATEGORY                  CHAR (2),       /* FR1549 */00140503
+                                                                        00140603
+       5 ZDOC_LAST_HISTORY_KEY              CHAR (2),       /* FR1196 */00140703
+         /* VALUE 01 - 99  WHERE 01 IS OLDEST HISTORY RECORD          */00140803
+                                                                        00140903
+       5 ZDOC_STATUS_CHANGED_REASON         CHAR (1),       /* FR1390 */00141003
+                                                                        00141103
+       5 ZDOC_APPLICATION_NUMBER            CHAR (9),       /* FR1655 */00141203
+                                                                        00141303
+       5 ZDOC_CITZ_DOC_TYPE                 CHAR (1),       /* FR1706 */00141403
+                                                                        00141503
+       5 ZDOC_MORE_FLAGS,                                   /* FR2256 */00141603
+         7 ZDOC_UNUSED_FLAGS                BIT (2),        /* FR2256 */00141703
+         7 ZDOC_INCLUDE_IN_L_T_COUNT        BIT (1),        /* FR2543 */00141803
+         7 ZDOC_EPPORT_DOCUMENT             BIT (1),        /* FR2539 */00141903
+         7 ZDOC_ONE_WAY_TRAVEL              BIT (1),        /* FR2495 */00142003
+         7 ZDOC_DELTAWEB_CHECKED            BIT (1),   /* SY 04/07/03 */00142103
+         7 ZDOC_SENIOR_CITIZEN              BIT (1),        /* FR2256 */00142203
+         7 ZDOC_PRIORITY_FEE_PAID           BIT (1),        /* FR2256 */00142303
+                                                                        00142403
+       5 ZDOC_DESTRUCTION_CERT              FIXED DEC (7), /* FR2373 */ 00142503
+       5 ZDOC_ZPER_UPDATE_SEQ_NO            CHAR (2),      /* FR2686 */ 00142603
+       5 ZDOC_ISSUE_LOCATION                CHAR (1),      /* FR2865 */ 00142703
+ /* ISSUE LOCATION RECORDS THE CHPT SITE THAT ISSUED THE PASSPORT.   */ 00142803
+ /* C = CHPT CANBERRA, S = CHPT SYDNEY                               */ 00142903
+       5 ZDOC_FILLER                        CHAR (1),      /* FR2865 */ 00143003
+                                                                        00143103
+       5 ZDOC_CRA_DETAILS,                                              00143203
+         7 ZDOC_CRA_PHONE_IDD               CHAR (3),                   00143303
+         7 ZDOC_CRA_PHONE_STD               CHAR (4),                   00143403
+         7 ZDOC_CRA_PHONE_NUMBER            CHAR (11),                  00143503
+         7 ZDOC_CRA_FAMILY_NAME             CHAR (31),                  00143603
+                                                                        00143703
+       5 ZDOC_INVESTIGATION_DETAILS,                                    00143803
+         7 ZDOC_INV_REASON_CODE (10)        CHAR (1),     /* 99A-99Z */ 00143903
+         7 ZDOC_INV_NARRATIVE (2)           CHAR (76),                  00144003
+                                                                        00144103
+       5 ZDOC_DOC_NARRATIVE (2)             CHAR (76),                  00144203
+                                                                        00144303
+       5 ZDOC_IMPOUND_DETAILS,                                          00144403
+         7 ZDOC_IMPOUND_OPID                CHAR (4),                   00144503
+         7 ZDOC_IMPOUND_OFFICE              CHAR (4),                   00144603
+         7 ZDOC_IMPOUND_DATE                CHAR (7) ;    /* CYYMMDD */ 00144703
+           /* NOTE THIS IS CHAR NOT FIXED DEC FOR COMPRESSION REASONS */00144803
+                                                                                
+                                                                                

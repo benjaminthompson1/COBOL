@@ -1,0 +1,31 @@
+      * File: ZOFFICE.cpy                                                       
+      ******************************************************************        
+      * DCLGEN TABLE(DVM.ZOFFICE_ITEM_SUPPLIER)                        *        
+      *        LIBRARY(IBMUSER.COBOL.COPYLIB(ZOFFICE))                 *        
+      *        LANGUAGE(COBOL)                                         *        
+      *        QUOTE                                                   *        
+      * ... IS THE DCLGEN COMMAND THAT MADE THE FOLLOWING STATEMENTS   *        
+      ******************************************************************        
+           EXEC SQL DECLARE DVM.ZOFFICE_ITEM_SUPPLIER TABLE                     
+           ( WS_ITEM_REF                    INTEGER,                            
+             WS_MANUFACTURER_NAME           VARCHAR(20),                        
+             WS_MANUFACTURER_ADDRESS        VARCHAR(30)                         
+           ) END-EXEC.                                                          
+      ******************************************************************        
+      * COBOL DECLARATION FOR TABLE DVM.ZOFFICE_ITEM_SUPPLIER          *        
+      ******************************************************************        
+       01  DCLZOFFICE-ITEM-SUPPLIER.                                            
+           10 WS-ITEM-REF          PIC S9(9) USAGE COMP.                        
+           10 WS-MANUFACTURER-NAME.                                             
+              49 WS-MANUFACTURER-NAME-LEN                                       
+                 PIC S9(4) USAGE COMP.                                          
+              49 WS-MANUFACTURER-NAME-TEXT                                      
+                 PIC X(20).                                                     
+           10 WS-MANUFACTURER-ADDRESS.                                          
+              49 WS-MANUFACTURER-ADDRESS-LEN                                    
+                 PIC S9(4) USAGE COMP.                                          
+              49 WS-MANUFACTURER-ADDRESS-TEXT                                   
+                 PIC X(30).                                                     
+      ******************************************************************        
+      * THE NUMBER OF COLUMNS DESCRIBED BY THIS DECLARATION IS 3       *        
+      ******************************************************************        

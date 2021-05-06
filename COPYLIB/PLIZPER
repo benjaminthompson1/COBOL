@@ -1,0 +1,79 @@
+ /*##################################################################*/ 00010000
+ /*   PERSON FILE RECORD LAYOUT (ZPER)      09/01/89    FR795        */ 00020000
+ /*                                                                  */ 00030000
+ /*                  LAYOUT FOR MATCHED PERSON AREA                  */ 00040000
+ /*   THIS IS ALSO THE LAYOUT FOR UNCOMPRESSED PERSON RECORD ZPERDB  */ 00050000
+ /*##################################################################*/ 00060000
+ DCL 1 ZPER_RECORD,                                                     00070000
+      3 ZPER_PID_AREA,                                                  00080006
+                                                                        00090004
+        5 ZPER_KEY,                                                     00100004
+          7 ZPER_PID                    BIT (32),                       00110006
+        5 ZPER_BIOGRAPHIC_DATA,                                         00120004
+          7 ZPER_DOB                    FIXED DEC (7,0),                00130006
+          7 ZPER_SEX                    CHAR (1),                       00140004
+          7 ZPER_PLACE_BIRTH            CHAR (27),                      00150004
+          7 ZPER_COUNTRY_CITIZEN (3)    CHAR (3),                       00160004
+          7 ZPER_HEIGHT                 FIXED DEC (3,0),                00170004
+          7 ZPER_ALERT_COUNT            FIXED BIN (15),                 00180004
+          7 ZPER_MMNAME                 CHAR (31),                      00190004
+          7 ZPER_NEXT_OF_KIN_1,                                         00200004
+            9 ZPER_KIN_FAMILY_NAME      CHAR (31),                      00210004
+            9 ZPER_KIN_PHONE_STD        CHAR (4),                       00220004
+            9 ZPER_KIN_PHONE_NUMBER     CHAR (11),                      00230004
+                                                                        00240004
+          7 ZPER_FLAGS,                                                 00250004
+            9 ZPER_DOC_PURGED           BIT (1),                        00260004
+            9 ZPER_OPER_ALERT_ONLY      BIT (1),                        00270004
+            9 ZPER_ELECT_ROLL_MATCH     BIT (1),                        00280006
+            9 ZPER_DUMMY_FLAG           BIT (1),                        00290006
+            9 ZPER_RESIDENCY_CHECKED    BIT (1),                        00300006
+            9 ZPER_IDENTICAL_TWIN       BIT (1),                        00310006
+            9 ZPER_INDEXED_ON_FNME      BIT (1),                        00320006
+            9 ZPER_FILLER_FLAGS         BIT (1),                        00330006
+                                                                        00340004
+          7 ZPER_LAST_EROLL_MATCH_DATE  FIXED DEC (7,0),                00350006
+                                                                        00360004
+          7 ZPER_VERSION_NO             PIC '9',                        00370004
+                                                                        00380004
+          7 ZPER_NEXT_OF_KIN_2,                                         00390004
+            9 ZPER_KIN_RELATIONSHIP     CHAR (2),                       00400006
+            9 ZPER_KIN_PHONE_IDD        CHAR (3),                       00410006
+                                                                        00420004
+          7 ZPER_UPDATE_SEQ_NO          CHAR (2),                       00430006
+          7 ZPER_RESERVED               CHAR (4),                       00440006
+                                                                        00450004
+        5 ZPERDB_SPEC_DB_AREA,                                          00460007
+          7 ZPERDB_TOTAL_SCORE           FIXED BIN (15),                00470008
+          7 ZPERDB_DB_FLAGS              UNALIGNED,                     00480008
+            9 ZPERDB_SAVE_ALERT_STATUS     BIT (1),                     00490007
+            9 ZPERDB_CURRENT_ALERT_STATUS  BIT (1),                     00500007
+            9 ZPERDB_EXACT_MATCH           BIT (1),                     00510007
+            9 ZPERDB_UNUSED_FLAG           BIT (5),                     00520007
+          7 ZPERDB_SAVE_DOB              FIXED DEC (7),                 00530008
+          7 ZPERDB_SAVE_SEX              CHAR (1),                      00540008
+                                                                        00550004
+      3 ZPER_NG (8),                                                    00560008
+        5 ZPER_NAME_FILLER               CHAR (1),                      00570007
+        5 ZPER_NAME_PIDE                 CHAR (1),                      00580007
+        5 ZPER_NAME_FAMILY               CHAR (31),                     00590007
+        5 ZPER_NAME_GIVEN                CHAR (31),                     00600007
+        5 ZPER_NAME_FLAGS,                                              00610009
+          7 ZPER_NAME_CURR               BIT (1),                       00620008
+          7 ZPER_NAME_NAB                BIT (1),                       00630008
+          7 ZPER_NAME_NAC                BIT (1),                       00640008
+          7 ZPER_NAME_BDM                BIT (1),                       00650008
+          7 ZPER_NAME_UNUSED             BIT (4),                       00660009
+                                                                        00670004
+        5 ZPERDB_NDB_AREA                CHAR (51),                     00680008
+                                                                        00690005
+      3 ZPER_DOC_GROUP (8),                                             00700007
+        5 ZPER_DOC_STATUS                CHAR (1),                      00710007
+        5 ZPER_DOC_HOLDER_PID            BIT (32),                      00720007
+        5 ZPER_DOC_PIDE                  CHAR (1),                      00730007
+        5 ZPER_DOC_NUMBER                CHAR (9),                      00740007
+        5 ZPERDB_DOC_DB_AREA             CHAR (1),                      00750009
+                                                                        00770005
+      3 ZPER_ALERT_GROUP (4),                                           00780007
+        5 ZPER_ALERT_STOP_CODE           CHAR (2),                      00790007
+        5 ZPER_ALERT_ID                  CHAR (1);                      00800007
