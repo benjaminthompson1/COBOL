@@ -1,0 +1,140 @@
+       IDENTIFICATION DIVISION.                                                 
+       PROGRAM-ID. DB2ARCH.                                                     
+      *                                                                         
+      * This program performs several functiuons on a Db2 Archive table         
+      *                                                                         
+       ENVIRONMENT DIVISION.                                                    
+       INPUT-OUTPUT SECTION.                                                    
+       FILE-CONTROL.                                                            
+           SELECT IMMUN-IN ASSIGN TO IMMUN                                      
+             ORGANIZATION IS SEQUENTIAL.                                        
+                                                                                
+       DATA DIVISION.                                                           
+       FILE SECTION.                                                            
+       FD  IMMUN-IN                                                             
+           RECORDING MODE IS F                                                  
+           LABEL RECORDS ARE STANDARD                                           
+           RECORD CONTAINS 80 CHARACTERS                                        
+           BLOCK CONTAINS 0 RECORDS                                             
+           DATA RECORD IS IMMUNISATION-REC.                                     
+       01  IMMUNISATION-REC          PIC X(80).                                 
+                                                                                
+       WORKING-STORAGE SECTION.                                                 
+      * End of File switch                                                      
+       77  IMMUNISATION-EOF          PIC X(01) VALUE SPACE.                     
+           88 END-OF-FILE            VALUE 'Y'.                                 
+      * Db2 return code                                                         
+       77  SQLCODE-OUT               PIC S9(03) VALUE 0.                        
+                                                                                
+      * Program operation                                                       
+      * L = LOAD                                                                
+      * D = DELETE                                                              
+      * S = BASE ONLY                                                           
+      * A = ARCHIVE ONLY                                                        
+      * B = BOTH                                                                
+       01  IMMUNISATION-WS.                                                     
+           05  OPERATION              PIC X(01).                                
+           05  IMMUNISATION-DATA      PIC X(79).                                
+                                                                                
+       01  INSERT-IMMUNISATION-WS.                                              
+           10 INSERT-PERSON-ID        PIC 9(4).                                 
+           10 INSERT-VACCINATION-TYPE PIC X(5).                                 
+           10 INSERT-VACCINATION-DATE PIC X(10).                                
+           10 FILLER                  PIC X(61).                                
+                                                                                
+      * IMMUNISATION DCLGEN                                                     
+           EXEC SQL                                                             
+              INCLUDE IMMUN                                                     
+           END-EXEC.                                                            
+                                                                                
+      * SQL communication area (SQLCA) to check return status                   
+           EXEC SQL                                                             
+              INCLUDE SQLCA                                                     
+           END-EXEC.                                                            
+                                                                                
+       PROCEDURE DIVISION.                                                      
+           PERFORM 000-Housekeeping.                                            
+           PERFORM 100-Main UNTIL END-OF-FILE.                                  
+           PERFORM 900-Close-Files.                                             
+           GOBACK.                                                              
+                                                                                
+       000-Housekeeping.                                                        
+           INITIALIZE IMMUNISATION-WS.                                          
+           DISPLAY 'INITIALIZE'                                                 
+           PERFORM 300-Open-Files.                                              
+      * Priming Read                                                            
+           PERFORM 400-Read-IN-PARM.                                            
+                                                                                
+       100-Main.                                                                
+           EVALUATE OPERATION                                                   
+           WHEN 'L'                                                             
+              DISPLAY 'LOAD'                                                    
+              PERFORM 500-Immunisation-Insert                                   
+           WHEN 'D'                                                             
+              DISPLAY 'DELETE'                                                  
+           WHEN 'S'                                                             
+              DISPLAY 'BASE ONLY'                                               
+           WHEN 'A'                                                             
+              DISPLAY 'ARCHIVE ONLY'                                            
+           WHEN 'B'                                                             
+              DISPLAY 'BOTH'                                                    
+           WHEN OTHER                                                           
+              DISPLAY 'ERROR'                                                   
+           END-EVALUATE.                                                        
+                                                                                
+           PERFORM 400-Read-IN-PARM.                                            
+                                                                                
+       300-Open-Files.                                                          
+           OPEN INPUT IMMUN-IN.                                                 
+                                                                                
+       400-Read-IN-PARM.                                                        
+           READ IMMUN-IN INTO IMMUNISATION-WS                                   
+      * Set AT END Switch                                                       
+               AT END MOVE 'Y' TO IMMUNISATION-EOF                              
+           END-READ.                                                            
+                                                                                
+       500-Immunisation-Insert.                                                 
+           MOVE IMMUNISATION-DATA       TO INSERT-IMMUNISATION-WS               
+           MOVE INSERT-PERSON-ID        TO PERSON-ID                            
+           MOVE INSERT-VACCINATION-TYPE TO VACCINATION-TYPE                     
+           MOVE INSERT-VACCINATION-DATE TO VACCINATION-DATE                     
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+           DISPLAY 'VACCINATION-TYPE = ' VACCINATION-TYPE                       
+           DISPLAY 'VACCINATION-DATE = ' VACCINATION-DATE                       
+      * SQL insert - one row only                                               
+           EXEC SQL                                                             
+                INSERT INTO IBMUSER.IMMUNISATION                                
+                  (                                                             
+                   PERSON_ID,                                                   
+                   VACCINATION_TYPE,                                            
+                   VACCINATION_DATE                                             
+                  )                                                             
+                VALUES                                                          
+                  (                                                             
+                   :PERSON-ID,                                                  
+                   :VACCINATION-TYPE,                                           
+                   :VACCINATION-DATE                                            
+                  )                                                             
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+      * While only a read throught it best to issue rollback                    
+              EXEC SQL ROLLBACK WORK                                            
+              END-EXEC                                                          
+              DISPLAY 'SQL INSERT ERROR '                                       
+                      ' SQLCODE = ' SQLCODE                                     
+                      ' PERSON-ID = ' INSERT-PERSON-ID                          
+           ELSE                                                                 
+      * Commit to release locks                                                 
+              EXEC SQL COMMIT WORK                                              
+              END-EXEC                                                          
+           END-IF.                                                              
+                                                                                
+       900-Close-Files.                                                         
+           CLOSE IMMUN-IN.                                                      
+           EXEC SQL                                                             
+             CLOSE IMMUN                                                        
+           END-EXEC.                                                            
+                                                                                
+                                                                                
+                                                                                

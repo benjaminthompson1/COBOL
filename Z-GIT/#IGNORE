@@ -1,0 +1,25 @@
+*                                                                               
+*  The #IGNORE member contains a list of datasets/members                       
+*  that if found on a z/OS system are not managed by zGit                       
+*                                                                               
+*  Note: While the content is not managed, it is possible                       
+*  to allocate the dataset as part of the project. An example                   
+*  of this might be a load library where the content is not                     
+*  managed by git but the dataset needs to be allocated as                      
+*  it is required as part of the project                                        
+*                                                                               
+*  The full name of an untracked dataset is found by                            
+*  prefixing the datasets listed below with the project prefix                  
+*                                                                               
+*                                                                               
+*      PREFIX||.llq                                                             
+*                                                                               
+*  The syntax of each line can be one of the following:                         
+*                                                                               
+*      .llq                  For an entire dataset, or                          
+*      .llq(member)          For an individual member                           
+*      .llq=attributes       DS is allocated but untracked                      
+*                                                                               
+.DBRMLIB=1-1-TRACK-PO-FB-80-32720-NO_LIM                                        
+.LOAD=204-18-BLOCK-PO-U-0-4096-NO_LIM                                           
+.OBJECT=15-18-BLOCK-PO-FB-80-32720-NO_LIM                                       
