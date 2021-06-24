@@ -40,7 +40,15 @@
            10 INSERT-PERSON-ID        PIC 9(4).                                 
            10 INSERT-VACCINATION-TYPE PIC X(5).                                 
            10 INSERT-VACCINATION-DATE PIC X(10).                                
-           10 FILLER                  PIC X(61).                                
+           10 FILLER                  PIC X(60).                                
+                                                                                
+       01  DELETE-IMMUNISATION-WS.                                              
+           10 DELETE-PERSON-ID        PIC 9(4).                                 
+           10 FILLER                  PIC X(75).                                
+                                                                                
+       01  SELECT-IMMUNISATION-WS.                                              
+           10 SELECT-PERSON-ID        PIC 9(4).                                 
+           10 FILLER                  PIC X(75).                                
                                                                                 
       * IMMUNISATION DCLGEN                                                     
            EXEC SQL                                                             
@@ -60,7 +68,6 @@
                                                                                 
        000-Housekeeping.                                                        
            INITIALIZE IMMUNISATION-WS.                                          
-           DISPLAY 'INITIALIZE'                                                 
            PERFORM 300-Open-Files.                                              
       * Priming Read                                                            
            PERFORM 400-Read-IN-PARM.                                            
@@ -72,12 +79,16 @@
               PERFORM 500-Immunisation-Insert                                   
            WHEN 'D'                                                             
               DISPLAY 'DELETE'                                                  
+              PERFORM 510-Immunisation-Delete                                   
            WHEN 'S'                                                             
               DISPLAY 'BASE ONLY'                                               
+              PERFORM 520-Immunisation-Select-Base                              
            WHEN 'A'                                                             
               DISPLAY 'ARCHIVE ONLY'                                            
+              PERFORM 530-Immunisation-Select-Arch                              
            WHEN 'B'                                                             
               DISPLAY 'BOTH'                                                    
+              PERFORM 540-Immunisation-Select-Both                              
            WHEN OTHER                                                           
               DISPLAY 'ERROR'                                                   
            END-EVALUATE.                                                        
@@ -90,7 +101,7 @@
        400-Read-IN-PARM.                                                        
            READ IMMUN-IN INTO IMMUNISATION-WS                                   
       * Set AT END Switch                                                       
-               AT END MOVE 'Y' TO IMMUNISATION-EOF                              
+              AT END MOVE 'Y' TO IMMUNISATION-EOF                               
            END-READ.                                                            
                                                                                 
        500-Immunisation-Insert.                                                 
@@ -98,36 +109,127 @@
            MOVE INSERT-PERSON-ID        TO PERSON-ID                            
            MOVE INSERT-VACCINATION-TYPE TO VACCINATION-TYPE                     
            MOVE INSERT-VACCINATION-DATE TO VACCINATION-DATE                     
-           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
-           DISPLAY 'VACCINATION-TYPE = ' VACCINATION-TYPE                       
-           DISPLAY 'VACCINATION-DATE = ' VACCINATION-DATE                       
       * SQL insert - one row only                                               
            EXEC SQL                                                             
-                INSERT INTO IBMUSER.IMMUNISATION                                
-                  (                                                             
-                   PERSON_ID,                                                   
-                   VACCINATION_TYPE,                                            
-                   VACCINATION_DATE                                             
-                  )                                                             
-                VALUES                                                          
-                  (                                                             
-                   :PERSON-ID,                                                  
-                   :VACCINATION-TYPE,                                           
-                   :VACCINATION-DATE                                            
-                  )                                                             
+              INSERT INTO IBMUSER.IMMUNISATION                                  
+                 (                                                              
+                  PERSON_ID,                                                    
+                  VACCINATION_TYPE,                                             
+                  VACCINATION_DATE                                              
+                 )                                                              
+              VALUES                                                            
+                 (                                                              
+                  :PERSON-ID,                                                   
+                  :VACCINATION-TYPE,                                            
+                  :VACCINATION-DATE                                             
+                 )                                                              
+           END-EXEC                                                             
+      * Commit insert                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
            END-EXEC                                                             
       * Check SQL returncode                                                    
            IF SQLCODE NOT EQUAL TO ZERO                                         
-      * While only a read throught it best to issue rollback                    
-              EXEC SQL ROLLBACK WORK                                            
-              END-EXEC                                                          
               DISPLAY 'SQL INSERT ERROR '                                       
                       ' SQLCODE = ' SQLCODE                                     
-                      ' PERSON-ID = ' INSERT-PERSON-ID                          
+                      ' PERSON-ID = ' PERSON-ID                                 
            ELSE                                                                 
-      * Commit to release locks                                                 
-              EXEC SQL COMMIT WORK                                              
-              END-EXEC                                                          
+              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
+              DISPLAY 'VACCINATION-TYPE = ' VACCINATION-TYPE                    
+              DISPLAY 'VACCINATION-DATE = ' VACCINATION-DATE                    
+           END-IF.                                                              
+                                                                                
+       510-Immunisation-Delete.                                                 
+           MOVE IMMUNISATION-DATA       TO DELETE-IMMUNISATION-WS               
+           MOVE DELETE-PERSON-ID        TO PERSON-ID                            
+      * SQL delete - one row only                                               
+           EXEC SQL                                                             
+                DELETE FROM IBMUSER.IMMUNISATION                                
+                WHERE PERSON_ID = :PERSON-ID                                    
+           END-EXEC                                                             
+      * Commit delete                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+              DISPLAY 'SQL DELETE ERROR '                                       
+                      ' SQLCODE = ' SQLCODE                                     
+                      ' PERSON-ID = ' PERSON-ID                                 
+           ELSE                                                                 
+              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
+           END-IF.                                                              
+                                                                                
+       520-Immunisation-Select-Base.                                            
+           MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
+           MOVE SELECT-PERSON-ID        TO PERSON-ID                            
+      * SQL select - one row only                                               
+           EXEC SQL                                                             
+                SELECT * INTO :DCLIMMUNISATION                                  
+                FROM IBMUSER.IMMUNISATION                                       
+                WHERE PERSON_ID = :PERSON-ID                                    
+           END-EXEC                                                             
+      * Commit select                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+              DISPLAY 'SQL DELETE ERROR '                                       
+                      ' SQLCODE = ' SQLCODE                                     
+                      ' PERSON-ID = ' PERSON-ID                                 
+           ELSE                                                                 
+              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
+                      ' VACCINATION-TYPE = ' VACCINATION-TYPE                   
+                      ' VACCINATION-DATE = ' VACCINATION-DATE                   
+           END-IF.                                                              
+                                                                                
+       530-Immunisation-Select-Arch.                                            
+           MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
+           MOVE SELECT-PERSON-ID        TO PERSON-ID                            
+      * SQL select - one row only                                               
+           EXEC SQL                                                             
+                SELECT * INTO :DCLIMMUNISATION                                  
+                FROM IBMUSER.IMMUNISATION                                       
+                WHERE PERSON_ID = :PERSON-ID                                    
+           END-EXEC                                                             
+      * Commit select                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+              DISPLAY 'SQL DELETE ERROR '                                       
+                      ' SQLCODE = ' SQLCODE                                     
+                      ' PERSON-ID = ' PERSON-ID                                 
+           ELSE                                                                 
+              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
+                      ' VACCINATION-TYPE = ' VACCINATION-TYPE                   
+                      ' VACCINATION-DATE = ' VACCINATION-DATE                   
+           END-IF.                                                              
+                                                                                
+       540-Immunisation-Select-Both.                                            
+           MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
+           MOVE SELECT-PERSON-ID        TO PERSON-ID                            
+      * SQL select - one row only                                               
+           EXEC SQL                                                             
+                SELECT * INTO :DCLIMMUNISATION                                  
+                FROM IBMUSER.IMMUNISATION                                       
+                WHERE PERSON_ID = :PERSON-ID                                    
+           END-EXEC                                                             
+      * Commit select                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+              DISPLAY 'SQL DELETE ERROR '                                       
+                      ' SQLCODE = ' SQLCODE                                     
+                      ' PERSON-ID = ' PERSON-ID                                 
+           ELSE                                                                 
+              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
+                      ' VACCINATION-TYPE = ' VACCINATION-TYPE                   
+                      ' VACCINATION-DATE = ' VACCINATION-DATE                   
            END-IF.                                                              
                                                                                 
        900-Close-Files.                                                         
