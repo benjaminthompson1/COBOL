@@ -100,6 +100,8 @@
            WHEN OTHER                                                           
               DISPLAY 'ERROR'                                                   
            END-EVALUATE.                                                        
+      * Initialise DCL Immunistation                                            
+           INITIALIZE DCLIMMUNISATION.                                          
                                                                                 
            PERFORM 400-Read-IN-PARM.                                            
                                                                                 
@@ -132,20 +134,17 @@
                   :VACCINATION-DATE                                             
                  )                                                              
            END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
       * Commit insert                                                           
            EXEC SQL                                                             
               COMMIT WORK                                                       
            END-EXEC                                                             
       * Check SQL returncode                                                    
-           IF SQLCODE NOT EQUAL TO ZERO                                         
-              DISPLAY 'SQL INSERT ERROR '                                       
-                      ' SQLCODE = ' SQLCODE                                     
-                      ' PERSON-ID = ' PERSON-ID                                 
-           ELSE                                                                 
-              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
-              DISPLAY 'VACCINATION-TYPE = ' VACCINATION-TYPE                    
-              DISPLAY 'VACCINATION-DATE = ' VACCINATION-DATE                    
-           END-IF.                                                              
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+                   ' VACCINATION-TYPE = ' VACCINATION-TYPE                      
+                   ' VACCINATION-DATE = ' VACCINATION-DATE.                     
                                                                                 
        510-Immunisation-Delete.                                                 
            MOVE IMMUNISATION-DATA       TO DELETE-IMMUNISATION-WS               
@@ -160,32 +159,28 @@
            EXEC SQL                                                             
               SET SYSIBMADM.MOVE_TO_ARCHIVE = :DB2-MOVE-TO-ARCHIVE              
            END-EXEC                                                             
-           DISPLAY 'SYSIBMADM.MOVE_TO_ARCHIVE :' DB2-MOVE-TO-ARCHIVE.           
-           DISPLAY 'MOVE-TO-ARCHIVE SQL CODE  :' SQLCODE.                       
-           DISPLAY '                SQLSTATE  :' SQLSTATE.                      
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'SYSIBMADM.MOVE_TO_ARCHIVE :' DB2-MOVE-TO-ARCHIVE            
       * Commit global variable                                                  
            EXEC SQL                                                             
               COMMIT WORK                                                       
            END-EXEC                                                             
-           DISPLAY 'COMMIT MOVE-TO-ARCHIVE SQL CODE :' SQLCODE.                 
-           DISPLAY '                       SQLSTATE :' SQLSTATE.                
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
       * SQL delete - one row                                                    
            EXEC SQL                                                             
               DELETE FROM IBMUSER.IMMUNISATION                                  
               WHERE PERSON_ID = :PERSON-ID                                      
            END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
       * Commit delete                                                           
            EXEC SQL                                                             
               COMMIT WORK                                                       
            END-EXEC                                                             
       * Check SQL returncode                                                    
-           IF SQLCODE NOT EQUAL TO ZERO                                         
-              DISPLAY 'SQL DELETE ERROR '                                       
-                      ' SQLCODE = ' SQLCODE                                     
-                      ' PERSON-ID = ' PERSON-ID                                 
-           ELSE                                                                 
-              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
-           END-IF.                                                              
+           PERFORM 800-SQL-Return-Codes.                                        
                                                                                 
        520-Immunisation-Select-Base.                                            
            MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
@@ -200,35 +195,32 @@
            EXEC SQL                                                             
               SET SYSIBMADM.GET_ARCHIVE = :DB2-GET-ARCHIVE                      
            END-EXEC                                                             
-           DISPLAY 'SYSIBMADM.GET_ARCHIVE :' DB2-GET-ARCHIVE.                   
-           DISPLAY 'GET-ARCHIVE SQL CODE  :' SQLCODE.                           
-           DISPLAY '            SQLSTATE  :' SQLSTATE.                          
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'SYSIBMADM.GET_ARCHIVE :' DB2-GET-ARCHIVE                    
       * Commit global variable                                                  
            EXEC SQL                                                             
               COMMIT WORK                                                       
            END-EXEC                                                             
-           DISPLAY 'COMMIT GET-ARCHIVE SQL CODE :' SQLCODE.                     
-           DISPLAY '                   SQLSTATE :' SQLSTATE.                    
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
       * SQL select - one row only                                               
            EXEC SQL                                                             
                 SELECT * INTO :DCLIMMUNISATION                                  
                 FROM IBMUSER.IMMUNISATION                                       
                 WHERE PERSON_ID = :PERSON-ID                                    
            END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
       * Commit select                                                           
            EXEC SQL                                                             
               COMMIT WORK                                                       
            END-EXEC                                                             
       * Check SQL returncode                                                    
-           IF SQLCODE NOT EQUAL TO ZERO                                         
-              DISPLAY 'SQL SELECT ERROR '                                       
-                      ' SQLCODE = ' SQLCODE                                     
-                      ' PERSON-ID = ' PERSON-ID                                 
-           ELSE                                                                 
-              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
-                      ' VACCINATION-TYPE = ' VACCINATION-TYPE                   
-                      ' VACCINATION-DATE = ' VACCINATION-DATE                   
-           END-IF.                                                              
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+                   ' VACCINATION-TYPE = ' VACCINATION-TYPE                      
+                   ' VACCINATION-DATE = ' VACCINATION-DATE.                     
                                                                                 
        530-Immunisation-Select-Arch.                                            
            MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
@@ -239,19 +231,25 @@
                 FROM IBMUSER.IMMUNISATION_ARCHIVE                               
                 WHERE PERSON_ID = :PERSON-ID                                    
            END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
       * Commit select                                                           
            EXEC SQL                                                             
               COMMIT WORK                                                       
            END-EXEC                                                             
       * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+                   ' VACCINATION-TYPE = ' VACCINATION-TYPE                      
+                   ' VACCINATION-DATE = ' VACCINATION-DATE.                     
+                                                                                
+       800-SQL-Return-Codes.                                                    
            IF SQLCODE NOT EQUAL TO ZERO                                         
-              DISPLAY 'SQL DELETE ERROR '                                       
-                      ' SQLCODE = ' SQLCODE                                     
-                      ' PERSON-ID = ' PERSON-ID                                 
-           ELSE                                                                 
-              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
-                      ' VACCINATION-TYPE = ' VACCINATION-TYPE                   
-                      ' VACCINATION-DATE = ' VACCINATION-DATE                   
+              DISPLAY 'SQL ERROR '                                              
+                      ' SQLCODE : ' SQLCODE                                     
+                      ' SQLSTATE  :' SQLSTATE                                   
+                      ' PERSON-ID : ' PERSON-ID                                 
+                      ' OPERATION-TYPE : ' OPERATION                            
            END-IF.                                                              
                                                                                 
        900-Close-Files.                                                         
