@@ -25,30 +25,35 @@
            88 END-OF-FILE            VALUE 'Y'.                                 
       * Db2 return code                                                         
        77  SQLCODE-OUT               PIC S9(03) VALUE 0.                        
+      * Db2 SYSIBMADM.MOVE_TO_ARCHIVE built-in global variable                  
+       77  DB2-MOVE-TO-ARCHIVE       PIC X(01) VALUE 'N'.                       
+      * Db2 SYSIBMADM.GET_ARCHIVE built-in global variable                      
+       77  DB2-GET-ARCHIVE           PIC X(01) VALUE 'N'.                       
                                                                                 
       * Program operation                                                       
-      * L = LOAD                                                                
-      * D = DELETE                                                              
-      * S = BASE ONLY                                                           
-      * A = ARCHIVE ONLY                                                        
-      * B = BOTH                                                                
+      * LD = LOAD                                                               
+      * DD = DELETE                                                             
+      * DA = DELETE                                                             
+      * SB = BASE ONLY                                                          
+      * SA = ARCHIVE ONLY                                                       
+      * SS = BOTH                                                               
        01  IMMUNISATION-WS.                                                     
-           05  OPERATION              PIC X(01).                                
-           05  IMMUNISATION-DATA      PIC X(79).                                
+           05  OPERATION              PIC X(02).                                
+           05  IMMUNISATION-DATA      PIC X(78).                                
                                                                                 
        01  INSERT-IMMUNISATION-WS.                                              
            10 INSERT-PERSON-ID        PIC 9(4).                                 
            10 INSERT-VACCINATION-TYPE PIC X(5).                                 
            10 INSERT-VACCINATION-DATE PIC X(10).                                
-           10 FILLER                  PIC X(60).                                
+           10 FILLER                  PIC X(59).                                
                                                                                 
        01  DELETE-IMMUNISATION-WS.                                              
            10 DELETE-PERSON-ID        PIC 9(4).                                 
-           10 FILLER                  PIC X(75).                                
+           10 FILLER                  PIC X(74).                                
                                                                                 
        01  SELECT-IMMUNISATION-WS.                                              
            10 SELECT-PERSON-ID        PIC 9(4).                                 
-           10 FILLER                  PIC X(75).                                
+           10 FILLER                  PIC X(74).                                
                                                                                 
       * IMMUNISATION DCLGEN                                                     
            EXEC SQL                                                             
@@ -74,21 +79,24 @@
                                                                                 
        100-Main.                                                                
            EVALUATE OPERATION                                                   
-           WHEN 'L'                                                             
+           WHEN 'LD'                                                            
               DISPLAY 'LOAD'                                                    
               PERFORM 500-Immunisation-Insert                                   
-           WHEN 'D'                                                             
-              DISPLAY 'DELETE'                                                  
+           WHEN 'DD'                                                            
+              DISPLAY 'DELETE DELETE'                                           
               PERFORM 510-Immunisation-Delete                                   
-           WHEN 'S'                                                             
-              DISPLAY 'BASE ONLY'                                               
+           WHEN 'DA'                                                            
+              DISPLAY 'DELETE ARCHIVE'                                          
+              PERFORM 510-Immunisation-Delete                                   
+           WHEN 'SB'                                                            
+              DISPLAY 'SELECT BASE ONLY'                                        
               PERFORM 520-Immunisation-Select-Base                              
-           WHEN 'A'                                                             
-              DISPLAY 'ARCHIVE ONLY'                                            
+           WHEN 'SA'                                                            
+              DISPLAY 'SELECT ARCHIVE ONLY'                                     
               PERFORM 530-Immunisation-Select-Arch                              
-           WHEN 'B'                                                             
-              DISPLAY 'BOTH'                                                    
-              PERFORM 540-Immunisation-Select-Both                              
+           WHEN 'SS'                                                            
+              DISPLAY 'SELECT BOTH BASE AND ARCHIVE'                            
+              PERFORM 520-Immunisation-Select-Base                              
            WHEN OTHER                                                           
               DISPLAY 'ERROR'                                                   
            END-EVALUATE.                                                        
@@ -142,10 +150,29 @@
        510-Immunisation-Delete.                                                 
            MOVE IMMUNISATION-DATA       TO DELETE-IMMUNISATION-WS               
            MOVE DELETE-PERSON-ID        TO PERSON-ID                            
-      * SQL delete - one row only                                               
+      * Determin Delete or Archive                                              
+           IF OPERATION = 'DD'                                                  
+              MOVE 'N' TO DB2-MOVE-TO-ARCHIVE                                   
+           ELSE                                                                 
+              MOVE 'Y' TO DB2-MOVE-TO-ARCHIVE                                   
+           END-IF.                                                              
+      * SYSIBMADM.MOVE_TO_ARCHIVE built-in global variable                      
            EXEC SQL                                                             
-                DELETE FROM IBMUSER.IMMUNISATION                                
-                WHERE PERSON_ID = :PERSON-ID                                    
+              SET SYSIBMADM.MOVE_TO_ARCHIVE = :DB2-MOVE-TO-ARCHIVE              
+           END-EXEC                                                             
+           DISPLAY 'SYSIBMADM.MOVE_TO_ARCHIVE :' DB2-MOVE-TO-ARCHIVE.           
+           DISPLAY 'MOVE-TO-ARCHIVE SQL CODE  :' SQLCODE.                       
+           DISPLAY '                SQLSTATE  :' SQLSTATE.                      
+      * Commit global variable                                                  
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+           DISPLAY 'COMMIT MOVE-TO-ARCHIVE SQL CODE :' SQLCODE.                 
+           DISPLAY '                       SQLSTATE :' SQLSTATE.                
+      * SQL delete - one row                                                    
+           EXEC SQL                                                             
+              DELETE FROM IBMUSER.IMMUNISATION                                  
+              WHERE PERSON_ID = :PERSON-ID                                      
            END-EXEC                                                             
       * Commit delete                                                           
            EXEC SQL                                                             
@@ -163,6 +190,25 @@
        520-Immunisation-Select-Base.                                            
            MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
            MOVE SELECT-PERSON-ID        TO PERSON-ID                            
+      * Determin Select Base or Base and Archive                                
+           IF OPERATION = 'SB'                                                  
+              MOVE 'N' TO DB2-GET-ARCHIVE                                       
+           ELSE                                                                 
+              MOVE 'Y' TO DB2-GET-ARCHIVE                                       
+           END-IF.                                                              
+      * SYSIBMADM.GET_ARCHIVE built-in global variable                          
+           EXEC SQL                                                             
+              SET SYSIBMADM.GET_ARCHIVE = :DB2-GET-ARCHIVE                      
+           END-EXEC                                                             
+           DISPLAY 'SYSIBMADM.GET_ARCHIVE :' DB2-GET-ARCHIVE.                   
+           DISPLAY 'GET-ARCHIVE SQL CODE  :' SQLCODE.                           
+           DISPLAY '            SQLSTATE  :' SQLSTATE.                          
+      * Commit global variable                                                  
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+           DISPLAY 'COMMIT GET-ARCHIVE SQL CODE :' SQLCODE.                     
+           DISPLAY '                   SQLSTATE :' SQLSTATE.                    
       * SQL select - one row only                                               
            EXEC SQL                                                             
                 SELECT * INTO :DCLIMMUNISATION                                  
@@ -175,7 +221,7 @@
            END-EXEC                                                             
       * Check SQL returncode                                                    
            IF SQLCODE NOT EQUAL TO ZERO                                         
-              DISPLAY 'SQL DELETE ERROR '                                       
+              DISPLAY 'SQL SELECT ERROR '                                       
                       ' SQLCODE = ' SQLCODE                                     
                       ' PERSON-ID = ' PERSON-ID                                 
            ELSE                                                                 
@@ -190,31 +236,7 @@
       * SQL select - one row only                                               
            EXEC SQL                                                             
                 SELECT * INTO :DCLIMMUNISATION                                  
-                FROM IBMUSER.IMMUNISATION                                       
-                WHERE PERSON_ID = :PERSON-ID                                    
-           END-EXEC                                                             
-      * Commit select                                                           
-           EXEC SQL                                                             
-              COMMIT WORK                                                       
-           END-EXEC                                                             
-      * Check SQL returncode                                                    
-           IF SQLCODE NOT EQUAL TO ZERO                                         
-              DISPLAY 'SQL DELETE ERROR '                                       
-                      ' SQLCODE = ' SQLCODE                                     
-                      ' PERSON-ID = ' PERSON-ID                                 
-           ELSE                                                                 
-              DISPLAY 'PERSON-ID = ' PERSON-ID                                  
-                      ' VACCINATION-TYPE = ' VACCINATION-TYPE                   
-                      ' VACCINATION-DATE = ' VACCINATION-DATE                   
-           END-IF.                                                              
-                                                                                
-       540-Immunisation-Select-Both.                                            
-           MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
-           MOVE SELECT-PERSON-ID        TO PERSON-ID                            
-      * SQL select - one row only                                               
-           EXEC SQL                                                             
-                SELECT * INTO :DCLIMMUNISATION                                  
-                FROM IBMUSER.IMMUNISATION                                       
+                FROM IBMUSER.IMMUNISATION_ARCHIVE                               
                 WHERE PERSON_ID = :PERSON-ID                                    
            END-EXEC                                                             
       * Commit select                                                           
