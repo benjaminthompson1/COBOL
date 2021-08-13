@@ -1,0 +1,24 @@
+                                                                                
+       01  PSA.                                                                 
+           03  FILLER        PIC X(540).                                        
+           03  PSA-TCB       POINTER.                                           
+           03  FILLER        PIC X(4).                                          
+           03  PSA-ASCB      POINTER.                                           
+       01  TCB.                                                                 
+           03  FILLER        PIC X(12).                                         
+           03  TCB-TIOT      POINTER.                                           
+           03  FILLER        PIC X(28).                                         
+           03  TCB-CDE       POINTER.                                           
+       01  TIOT.                                                                
+           03  TIOT-JOB      PIC X(8).                                          
+           03  TIOT-STEP     PIC X(8).                                          
+       01  CDE.                                                                 
+           03  CDE-LINK      POINTER.                                           
+           03  FILLER        PIC X(4).                                          
+           03  CDE-NAME      PIC X(8).                                          
+       01  ASCB.                                                                
+           03  FILLER        PIC X(108).                                        
+           03  ASCB-ASXB     POINTER.                                           
+       01  ASXB.                                                                
+           03  FILLER        PIC X(192).                                        
+           03  ASXB-USERID   PIC X(8).                                          

@@ -1,0 +1,39 @@
+       IDENTIFICATION DIVISION.                                                 
+       PROGRAM-ID. WHOAMI.                                                      
+      *                                                                         
+      * This program displays the job and program details                       
+      *                                                                         
+       DATA DIVISION.                                                           
+       WORKING-STORAGE SECTION.                                                 
+       COPY WHOAMIWS.                                                           
+                                                                                
+       LINKAGE SECTION.                                                         
+       COPY WHOAMILK.                                                           
+                                                                                
+       PROCEDURE DIVISION.                                                      
+           PERFORM WHO-AM-I                                                     
+           DISPLAY 'JOB:     ' WHO-JOB                                          
+           DISPLAY 'STEP:    ' WHO-STEP                                         
+           DISPLAY 'PROGRAM: ' WHO-PROGRAM                                      
+           DISPLAY 'USER ID: ' WHO-USERID                                       
+           STOP RUN.                                                            
+                                                                                
+       WHO-AM-I.                                                                
+           SET ADDRESS OF PSA  TO NULL                                          
+           SET ADDRESS OF TCB  TO PSA-TCB                                       
+           SET ADDRESS OF TIOT TO TCB-TIOT                                      
+           SET ADDRESS OF CDE  TO TCB-CDE                                       
+           PERFORM                                                              
+                   WITH TEST BEFORE                                             
+                   UNTIL CDE-LINK = NULL                                        
+               SET ADDRESS OF CDE TO CDE-LINK                                   
+           END-PERFORM                                                          
+           SET ADDRESS OF ASCB TO PSA-ASCB                                      
+           SET ADDRESS OF ASXB TO ASCB-ASXB                                     
+           MOVE TIOT-JOB    TO WHO-JOB                                          
+           MOVE TIOT-STEP   TO WHO-STEP                                         
+           MOVE CDE-NAME    TO WHO-PROGRAM                                      
+           MOVE ASXB-USERID TO WHO-USERID                                       
+           EXIT.                                                                
+                                                                                
+                                                                                
