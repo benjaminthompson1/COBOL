@@ -1,0 +1,21 @@
+       IDENTIFICATION DIVISION.                                                 
+       PROGRAM-ID. AMTOOLS.                                                     
+      *                                                                         
+      * Andrew Mattingly Tools to return random number and delay                
+      *                                                                         
+       DATA DIVISION.                                                           
+       WORKING-STORAGE SECTION.                                                 
+       01  RAND-LOW        PIC S9(9) BINARY VALUE 200.                          
+       01  RAND-HIGH       PIC S9(9) BINARY VALUE 1500.                         
+       01  RAND-DELAY      PIC S9(9) BINARY.                                    
+       01  DYNAM-FUNC      PIC X(8).                                            
+       PROCEDURE DIVISION.                                                      
+           MOVE "AMRANDOM" TO DYNAM-FUNC                                        
+           CALL DYNAM-FUNC USING RAND-LOW RAND-HIGH RAND-DELAY                  
+           DISPLAY "Random low " RAND-LOW                                       
+           DISPLAY "Random high " RAND-HIGH                                     
+           DISPLAY "Delaying for " RAND-DELAY " milliseconds"                   
+           MOVE "AMDELAY" TO DYNAM-FUNC                                         
+           CALL DYNAM-FUNC USING RAND-DELAY                                     
+           DISPLAY "Delay done!"                                                
+           STOP RUN.                                                            
