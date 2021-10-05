@@ -1,0 +1,424 @@
+CBL NODYNAM,OBJECT,RENT,APOST                                                   
+      *                                                               *         
+      * ------------------------------------------------------------- *         
+       IDENTIFICATION DIVISION.                                                 
+      * ------------------------------------------------------------- *         
+       PROGRAM-ID. CSQ4BVJ1.                                                    
+      *REMARKS                                                                  
+      *****************************************************************         
+      * <copyright                                                    *         
+      * notice="lm-source"                                            *         
+      * pids="5655-MQ9"                                               *         
+      * years="1996,2017"                                             *         
+      * crc="2019270094" >                                            *         
+      * Licensed Materials - Property of IBM                          *         
+      *                                                               *         
+      * 5655-MQ9                                                      *         
+      *                                                               *         
+      * (C) Copyright IBM Corp. 1996, 2017 All Rights Reserved.       *         
+      * </copyright>                                                  *         
+      *****************************************************************         
+      *                                                               *         
+      *  IBM MQ for z/OS                                              *         
+      *                                                               *         
+      *  Module Name : CSQ4BVJ1                                       *         
+      *                                                               *         
+      *  Environment : z/OS Batch; COBOL II                           *         
+      *                                                               *         
+      *  Description : Sample program to get a number of messages     *         
+      *                from a queue.                                  *         
+      *                                                               *         
+      *  Notes       : The maximum message length is 65536. Messages  *         
+      *                greater than this will not cause an error but  *         
+      *                will be truncated.                             *         
+      *                The syncpoint option is ignored when browsing. *         
+      *                                                               *         
+      *****************************************************************         
+      *                                                               *         
+      *                       Program  Logic                          *         
+      *                       --------------                          *         
+      *                                                               *         
+      *  main                                                         *         
+      *  ----                                                         *         
+      *                                                               *         
+      *   Move parameters into corresponding variables.               *         
+      *   If parameters are invalid then                              *         
+      *            Call USAGE-ERROR and exit.                         *         
+      *                                                               *         
+      *   Display the parameters passed to the program.               *         
+      *                                                               *         
+      *   Connect to the queue manager (MQCONN).                      *         
+      *   If connection failed then                                   *         
+      *            Call DISPLAY-ERROR-MESSAGE and exit                *         
+      *                                                               *         
+      *   Set the open options.                                       *         
+      *   Open the specified message queue (MQOPEN).                  *         
+      *   If open failed then                                         *         
+      *            Disconnect from queue manager (MQDISC).            *         
+      *            Call DISPLAY-ERROR-MESSAGE and exit                *         
+      *   Endif.                                                      *         
+      *                                                               *         
+      *   Set the get message options.                                *         
+      *   Loop while the messages are received                        *         
+      *            Get message from queue (MQGET)                     *         
+      *            If get failed                                      *         
+      *                     Call DISPLAY-ERROR-MESSAGE.               *         
+      *                     Break from loop.                          *         
+      *            Else                                               *         
+      *                     Display the message received.             *         
+      *            Endif                                              *         
+      *   Endloop.                                                    *         
+      *   Display number of messages got from queue.                  *         
+      *                                                               *         
+      *   If syncpoint variable set then                              *         
+      *            Execute syncpoint.                                 *         
+      *                                                               *         
+      *   Close the message queue (MQCLOSE).                          *         
+      *   If close failed then                                        *         
+      *            Call DISPLAY-ERROR-MESSAGE.                        *         
+      *                                                               *         
+      *   Disconnect from the queue manager (MQDISC).                 *         
+      *   If disconnect failed then                                   *         
+      *            Call DISPLAY-ERROR-MESSAGE.                        *         
+      *                                                               *         
+      *   Exit program.                                               *         
+      *                                                               *         
+      *---------------------------------------------------------------*         
+      *                                                               *         
+      *  USAGE-ERROR                                                  *         
+      *  -----------                                                  *         
+      *                                                               *         
+      *   Print message showing correct usage for program.            *         
+      *                                                               *         
+      *---------------------------------------------------------------*         
+      *                                                               *         
+      *  DISPLAY-ERROR-MESSAGE                                        *         
+      *  ---------------------                                        *         
+      *                                                               *         
+      *   Create error message and display.                           *         
+      *                                                               *         
+      *****************************************************************         
+      * ------------------------------------------------------------- *         
+       ENVIRONMENT DIVISION.                                                    
+      * ------------------------------------------------------------- *         
+      * ------------------------------------------------------------- *         
+       DATA DIVISION.                                                           
+      * ------------------------------------------------------------- *         
+       FILE SECTION.                                                            
+      * ------------------------------------------------------------- *         
+       WORKING-STORAGE SECTION.                                                 
+      * ------------------------------------------------------------- *         
+      *                                                                         
+      *    W00 - General work fields                                            
+      *                                                                         
+       01  W00-RETURN-CODE             PIC S9(4) BINARY VALUE ZERO.             
+       01  W00-LOOP                    PIC S9(9) BINARY VALUE 0.                
+       01  W00-NUMGETS                 PIC S9(9) BINARY VALUE 0.                
+       01  W00-ERROR-MESSAGE           PIC X(48) VALUE SPACES.                  
+       01  W00-MSGBUFFER.                                                       
+         02  W00-MSGBUFFER-ARRAY         PIC X(1) OCCURS 65536 TIMES.           
+       01  W00-MSGLENGTH               PIC S9(9) BINARY VALUE 65536.            
+       01  W00-DATALENGTH              PIC S9(9) BINARY VALUE 0.                
+      *                                                                         
+      *    Parameter variables                                                  
+      *                                                                         
+       01  W00-QMGR                    PIC X(48).                               
+       01  W00-QNAME                   PIC X(48).                               
+       01  W00-NUMMSGS-NUM             PIC 9(4) VALUE 0.                        
+       01  W00-NUMMSGS                 PIC S9(9) BINARY VALUE 1.                
+       01  W00-BROWSE-GET              PIC X(1) VALUE 'D'.                      
+           88 BROWSE-GET      VALUE 'B'.                                        
+           88 DESTRUCTIVE-GET VALUE 'D'.                                        
+       01  W00-SYNCPOINT               PIC X(1) VALUE 'N'.                      
+           88 SYNCPOINT       VALUE 'S'.                                        
+           88 NO-SYNCPOINT    VALUE 'N'.                                        
+      *                                                                         
+      *    W03 - API fields                                                     
+      *                                                                         
+       01  W03-HCONN                   PIC S9(9) BINARY VALUE 0.                
+       01  W03-HOBJ                    PIC S9(9) BINARY VALUE 0.                
+       01  W03-OPENOPTIONS             PIC S9(9) BINARY.                        
+       01  W03-COMPCODE                PIC S9(9) BINARY.                        
+       01  W03-REASON                  PIC S9(9) BINARY.                        
+      *                                                                         
+      *    API control blocks                                                   
+      *                                                                         
+       01  MQM-OBJECT-DESCRIPTOR.                                               
+           COPY CMQODV.                                                         
+       01  MQM-MESSAGE-DESCRIPTOR.                                              
+           COPY CMQMDV.                                                         
+       01  MQM-GET-MESSAGE-OPTIONS.                                             
+           COPY CMQGMOV.                                                        
+      *                                                                         
+      *    MQV contains constants (for filling in the control blocks)           
+      *    and return codes (for testing the result of a call)                  
+      *                                                                         
+       01  MQM-CONSTANTS.                                                       
+           COPY CMQV SUPPRESS.                                                  
+      *                                                                         
+      *                                                                         
+      * ------------------------------------------------------------- *         
+       LINKAGE SECTION.                                                         
+      * ------------------------------------------------------------- *         
+       01  PARMDATA.                                                            
+           05  PARM-LEN                PIC S9(03) BINARY.                       
+           05  PARM-STRING             PIC X(100).                              
+      *                                                                         
+           EJECT                                                                
+      * ------------------------------------------------------------- *         
+       PROCEDURE DIVISION USING PARMDATA.                                       
+      * ------------------------------------------------------------- *         
+      * ------------------------------------------------------------- *         
+       A-MAIN SECTION.                                                          
+      * ------------------------------------------------------------- *         
+      *                                                                         
+      *    If no parameters passed to program then display                      
+      *    error message and exit                                               
+      *                                                                         
+           IF PARM-LEN = 0 THEN                                                 
+              PERFORM USAGE-ERROR                                               
+              MOVE 8 TO W00-RETURN-CODE                                         
+              GO TO A-MAIN-END                                                  
+           END-IF.                                                              
+      *                                                                         
+      *    Move parameters into corresponding variables                         
+      *                                                                         
+           UNSTRING PARM-STRING DELIMITED BY ALL ','                            
+                        INTO W00-QMGR                                           
+                             W00-QNAME                                          
+                             W00-NUMMSGS-NUM                                    
+                             W00-BROWSE-GET                                     
+                             W00-SYNCPOINT.                                     
+           MOVE W00-NUMMSGS-NUM   TO W00-NUMMSGS.                               
+      *                                                                         
+      *    Display parameters to be used in the program                         
+      *                                                                         
+           DISPLAY '==========================================='.               
+           DISPLAY 'PARAMETERS PASSED :'.                                       
+           DISPLAY '   QMGR        - ', W00-QMGR.                               
+           DISPLAY '   QNAME       - ', W00-QNAME.                              
+           DISPLAY '   NUMMSGS     - ', W00-NUMMSGS.                            
+           DISPLAY '   GET         - ', W00-BROWSE-GET.                         
+           DISPLAY '   SYNCPOINT   - ', W00-SYNCPOINT.                          
+           DISPLAY '==========================================='.               
+      *                                                                         
+      *    Connect to the queue manager                                         
+      *                                                                         
+           CALL 'MQCONN' USING W00-QMGR                                         
+                               W03-HCONN                                        
+                               W03-COMPCODE                                     
+                               W03-REASON.                                      
+      *                                                                         
+      *    If connection failed then display error message and exit             
+      *                                                                         
+           IF (W03-COMPCODE NOT = MQCC-OK) THEN                                 
+              MOVE 'MQCONN'   TO W00-ERROR-MESSAGE                              
+              PERFORM DISPLAY-ERROR-MESSAGE                                     
+              MOVE W03-REASON TO W00-RETURN-CODE                                
+              GO TO A-MAIN-END                                                  
+           END-IF.                                                              
+           DISPLAY 'MQCONN SUCCESSFUL'.                                         
+      *                                                                         
+      *    Open the queue for input shared and browse. Fail the                 
+      *    call if the queue manager is quiescing.                              
+      *                                                                         
+           COMPUTE W03-OPENOPTIONS = MQOO-INPUT-SHARED +                        
+                                     MQOO-BROWSE +                              
+                                     MQOO-FAIL-IF-QUIESCING.                    
+                                                                                
+           MOVE W00-QNAME   TO MQOD-OBJECTNAME.                                 
+      *                                                                         
+           CALL 'MQOPEN' USING W03-HCONN                                        
+                               MQOD                                             
+                               W03-OPENOPTIONS                                  
+                               W03-HOBJ                                         
+                               W03-COMPCODE                                     
+                               W03-REASON.                                      
+      *                                                                         
+      *    If open failed display error message and exit                        
+      *                                                                         
+           IF (W03-COMPCODE NOT = MQCC-OK) THEN                                 
+              MOVE 'MQOPEN'   TO W00-ERROR-MESSAGE                              
+              PERFORM DISPLAY-ERROR-MESSAGE                                     
+              MOVE W03-REASON TO W00-RETURN-CODE                                
+              GO TO A-MAIN-DISCONNECT                                           
+           END-IF.                                                              
+           DISPLAY 'MQOPEN SUCCESSFUL'.                                         
+      *                                                                         
+      *    Set MQGMO-OPTIONS .. don't wait if there are no messages             
+      *    on the queue, truncate the message if it does not fit in             
+      *    to our buffer, perform data conversion on the message if             
+      *    required and if possible, and fail the call if the queue             
+      *    manager is quiescing.                                                
+      *                                                                         
+           COMPUTE MQGMO-OPTIONS = MQGMO-NO-WAIT +                              
+                                   MQGMO-ACCEPT-TRUNCATED-MSG +                 
+                                   MQGMO-CONVERT +                              
+                                   MQGMO-FAIL-IF-QUIESCING.                     
+      *                                                                         
+      *    Set additional MQGMO-OPTIONS depending on parameters                 
+      *    passed into program                                                  
+      *                                                                         
+           IF SYNCPOINT AND DESTRUCTIVE-GET THEN                                
+              ADD MQGMO-SYNCPOINT    TO MQGMO-OPTIONS                           
+           ELSE                                                                 
+              ADD MQGMO-NO-SYNCPOINT TO MQGMO-OPTIONS                           
+           END-IF.                                                              
+      *                                                                         
+           IF BROWSE-GET THEN                                                   
+              ADD MQGMO-BROWSE-FIRST TO MQGMO-OPTIONS                           
+           END-IF.                                                              
+      *                                                                         
+      *    Loop getting the messages                                            
+      *    MSGID and CORRELID are reset before each MQGET                       
+      *                                                                         
+           PERFORM WITH TEST BEFORE VARYING W00-LOOP FROM 0 BY 1                
+               UNTIL (W00-LOOP >= W00-NUMMSGS)                                  
+      *                                                                         
+      *    To ensure that we can successfully retrieve the next                 
+      *    available message, we reset some fields of the MQMD first            
+      *                                                                         
+               MOVE MQMI-NONE TO MQMD-MSGID                                     
+               MOVE MQCI-NONE TO MQMD-CORRELID                                  
+               MOVE MQENC-NATIVE TO MQMD-ENCODING                               
+               MOVE MQCCSI-Q-MGR TO MQMD-CODEDCHARSETID                         
+      *                                                                         
+               CALL 'MQGET' USING W03-HCONN                                     
+                                  W03-HOBJ                                      
+                                  MQMD                                          
+                                  MQGMO                                         
+                                  W00-MSGLENGTH                                 
+                                  W00-MSGBUFFER                                 
+                                  W00-DATALENGTH                                
+                                  W03-COMPCODE                                  
+                                  W03-REASON                                    
+      *                                                                         
+      *    If get failed then display error message and                         
+      *    break out of the loop.                                               
+      *    Otherwise display the message received                               
+      *                                                                         
+               IF (W03-COMPCODE NOT = MQCC-OK) AND                              
+                  (W03-REASON NOT = MQRC-TRUNCATED-MSG-ACCEPTED) THEN           
+                  MOVE 'MQGET'     TO W00-ERROR-MESSAGE                         
+                  PERFORM DISPLAY-ERROR-MESSAGE                                 
+                  MOVE W00-NUMMSGS TO W00-LOOP                                  
+                  MOVE W03-REASON  TO W00-RETURN-CODE                           
+               ELSE                                                             
+                  IF W03-REASON = MQRC-TRUNCATED-MSG-ACCEPTED THEN              
+                     DISPLAY W00-LOOP, ' : ', W00-DATALENGTH, ' : ',            
+                             'Truncated to ', W00-MSGLENGTH, ' : ',             
+                             W00-MSGBUFFER(1:W00-MSGLENGTH)                     
+                  ELSE                                                          
+                     DISPLAY W00-LOOP, ' : ', W00-DATALENGTH, ' : ',            
+                             W00-MSGBUFFER(1:W00-DATALENGTH)                    
+                  END-IF                                                        
+                  ADD 1 TO W00-NUMGETS                                          
+               END-IF                                                           
+      *                                                                         
+      *    If browsing the queue then change the                                
+      *    MQGMO browse options                                                 
+      *                                                                         
+               IF (W00-LOOP = 0) AND BROWSE-GET THEN                            
+                  SUBTRACT MQGMO-BROWSE-FIRST FROM MQGMO-OPTIONS                
+                  ADD      MQGMO-BROWSE-NEXT  TO   MQGMO-OPTIONS                
+               END-IF                                                           
+      *                                                                         
+           END-PERFORM.                                                         
+      *                                                                         
+      *    Display the number of messages successfully got                      
+      *    from the queue.                                                      
+      *                                                                         
+           DISPLAY W00-NUMGETS, ' MESSAGES GOT FROM QUEUE'.                     
+      *                                                                         
+      *                                                                         
+      *    If program started with syncpoint and destructive get                
+      *    selected then execute syncpoint                                      
+      *                                                                         
+           IF SYNCPOINT AND DESTRUCTIVE-GET THEN                                
+              CALL 'MQCMIT' USING W03-HCONN                                     
+                                  W03-COMPCODE                                  
+                                  W03-REASON                                    
+              IF (W03-COMPCODE NOT = MQCC-OK) THEN                              
+                 MOVE 'MQCMIT'   TO W00-ERROR-MESSAGE                           
+                 PERFORM DISPLAY-ERROR-MESSAGE                                  
+                 MOVE W03-REASON TO W00-RETURN-CODE                             
+              ELSE                                                              
+                 DISPLAY 'MQCMIT SUCCESSFUL'                                    
+              END-IF                                                            
+           END-IF.                                                              
+      *                                                                         
+      *    Close the queue                                                      
+      *                                                                         
+           CALL 'MQCLOSE' USING W03-HCONN                                       
+                                W03-HOBJ                                        
+                                MQCO-NONE                                       
+                                W03-COMPCODE                                    
+                                W03-REASON.                                     
+           IF (W03-COMPCODE NOT = MQCC-OK) THEN                                 
+              MOVE 'MQCLOSE'  TO W00-ERROR-MESSAGE                              
+              PERFORM DISPLAY-ERROR-MESSAGE                                     
+              MOVE W03-REASON TO W00-RETURN-CODE                                
+           ELSE                                                                 
+              DISPLAY 'MQCLOSE SUCCESSFUL'                                      
+           END-IF.                                                              
+      *                                                                         
+      *                                                                         
+       A-MAIN-DISCONNECT.                                                       
+      *                                                                         
+      *    Disconnect from the queue manager                                    
+      *                                                                         
+           CALL 'MQDISC' USING W03-HCONN                                        
+                               W03-COMPCODE                                     
+                               W03-REASON.                                      
+           IF (W03-COMPCODE NOT = MQCC-OK) THEN                                 
+              MOVE 'MQDISC'   TO W00-ERROR-MESSAGE                              
+              PERFORM DISPLAY-ERROR-MESSAGE                                     
+              MOVE W03-REASON TO W00-RETURN-CODE                                
+           ELSE                                                                 
+              DISPLAY 'MQDISC SUCCESSFUL'                                       
+           END-IF.                                                              
+      *                                                                         
+       A-MAIN-END.                                                              
+      *                                                                         
+      *                                                                         
+           MOVE W00-RETURN-CODE TO RETURN-CODE                                  
+           STOP RUN.                                                            
+      *                                                                         
+      * ------------------------------------------------------------- *         
+       USAGE-ERROR SECTION.                                                     
+      * ------------------------------------------------------------- *         
+      *                                                                         
+           DISPLAY '=================================================='         
+           DISPLAY 'PARAMETERS FOR PROGRAM :'.                                  
+           DISPLAY '     QMGR       - QUEUE MANGER'.                            
+           DISPLAY '     QNAME      - QUEUE NAME'.                              
+           DISPLAY '     NUMMSGS    - NUMBER OF MESSAGES'.                      
+           DISPLAY '     GET        - (B)ROWSE / (D)ESTRUCTIVE GET'.            
+           DISPLAY '     SYNCPOINT  - (N)O / (S)YNCPOINT'.                      
+           DISPLAY '=================================================='.        
+      *                                                                         
+       USAGE-ERROR-END.                                                         
+      *                                                                         
+      *    RETURN TO PERFORMING FUNCTION                                        
+      *                                                                         
+           EXIT.                                                                
+      *                                                                         
+      * ------------------------------------------------------------- *         
+       DISPLAY-ERROR-MESSAGE SECTION.                                           
+      * ------------------------------------------------------------- *         
+      *                                                                         
+           DISPLAY '************************************************'.          
+           DISPLAY '* ', W00-ERROR-MESSAGE.                                     
+           DISPLAY '* COMPLETION CODE : ', W03-COMPCODE.                        
+           DISPLAY '* REASON CODE     : ', W03-REASON.                          
+           DISPLAY '************************************************'.          
+      *                                                                         
+       DISPLAY-ERROR-MESSAGE-END.                                               
+      *                                                                         
+      *    RETURN TO PERFORMING FUNCTION                                        
+      *                                                                         
+           EXIT.                                                                
+      *                                                                         
+      * ------------------------------------------------------------- *         
+      *                        END OF PROGRAM                                   
+      * ------------------------------------------------------------- *         
