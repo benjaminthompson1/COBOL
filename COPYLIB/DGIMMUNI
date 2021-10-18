@@ -1,6 +1,6 @@
       ******************************************************************        
       * DCLGEN TABLE(IBMUSER.IMMUNISATION)                             *        
-      *        LIBRARY(IBMUSER.COBOL.COPYLIB(IMMUN))                   *        
+      *        LIBRARY(IBMUSER.COBOL.COPYLIB(DGIMMUNI)                 *        
       *        ACTION(REPLACE)                                         *        
       *        LANGUAGE(COBOL)                                         *        
       *        QUOTE                                                   *        

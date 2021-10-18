@@ -1,0 +1,32 @@
+      ******************************************************************        
+      * DCLGEN TABLE(ERIS.PERSON)                                      *        
+      *        LIBRARY(IBMUSER.COBOL.COPYLIB(DGERISPE))                *        
+      *        LANGUAGE(COBOL)                                         *        
+      *        QUOTE                                                   *        
+      * ... IS THE DCLGEN COMMAND THAT MADE THE FOLLOWING STATEMENTS   *        
+      ******************************************************************        
+           EXEC SQL DECLARE ERIS.PERSON TABLE                                   
+           ( PERSON_ID                      INTEGER NOT NULL,                   
+             PERSON_FIRST_NAME              CHAR(20) NOT NULL,                  
+             PERSON_SURNAME                 CHAR(20) NOT NULL,                  
+             PERSON_ADDRESS                 CHAR(40) NOT NULL,                  
+             PERSON_POSTCODE                CHAR(4) NOT NULL,                   
+             PERSON_STATE                   CHAR(3) NOT NULL,                   
+             PERSON_SEX                     CHAR(1),                            
+             PERSON_DOB                     DATE                                
+           ) END-EXEC.                                                          
+      ******************************************************************        
+      * COBOL DECLARATION FOR TABLE ERIS.PERSON                        *        
+      ******************************************************************        
+       01  DCLPERSON.                                                           
+           10 PERSON-ID            PIC S9(9) USAGE COMP.                        
+           10 PERSON-FIRST-NAME    PIC X(20).                                   
+           10 PERSON-SURNAME       PIC X(20).                                   
+           10 PERSON-ADDRESS       PIC X(40).                                   
+           10 PERSON-POSTCODE      PIC X(4).                                    
+           10 PERSON-STATE         PIC X(3).                                    
+           10 PERSON-SEX           PIC X(1).                                    
+           10 PERSON-DOB           PIC X(10).                                   
+      ******************************************************************        
+      * THE NUMBER OF COLUMNS DESCRIBED BY THIS DECLARATION IS 8       *        
+      ******************************************************************        

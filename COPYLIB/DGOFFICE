@@ -1,7 +1,7 @@
       * File: ZOFFICE.cpy                                                       
       ******************************************************************        
       * DCLGEN TABLE(DVM.ZOFFICE_ITEM_SUPPLIER)                        *        
-      *        LIBRARY(IBMUSER.COBOL.COPYLIB(ZOFFICE))                 *        
+      *        LIBRARY(IBMUSER.COBOL.COPYLIB(DGOFFICE)                 *        
       *        LANGUAGE(COBOL)                                         *        
       *        QUOTE                                                   *        
       * ... IS THE DCLGEN COMMAND THAT MADE THE FOLLOWING STATEMENTS   *        

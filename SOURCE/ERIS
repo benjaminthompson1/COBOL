@@ -1,0 +1,189 @@
+      *-----------------------                                                  
+       IDENTIFICATION DIVISION.                                                 
+      *-----------------------                                                  
+       PROGRAM-ID.    ERIS.                                                     
+       AUTHOR.        BENJAMIN THOMPSON.                                        
+       DATE-WRITTEN. 18/10/21.                                                  
+                                                                                
+      *--------------------                                                     
+       ENVIRONMENT DIVISION.                                                    
+      *--------------------                                                     
+       INPUT-OUTPUT SECTION.                                                    
+       FILE-CONTROL.                                                            
+           SELECT ERIS-PERSON-FILE ASSIGN TO UT-S-ERISPER                       
+           ORGANIZATION IS SEQUENTIAL.                                          
+           SELECT ERIS-PROVIDER-FILE ASSIGN TO UT-S-ERISPRO                     
+           ORGANIZATION IS SEQUENTIAL.                                          
+           SELECT ERIS-VACCINE-FILE ASSIGN TO UT-S-ERISVAC                      
+           ORGANIZATION IS SEQUENTIAL.                                          
+                                                                                
+      *-------------                                                            
+       DATA DIVISION.                                                           
+      *-------------                                                            
+       FILE SECTION.                                                            
+       FD  ERIS-PERSON-FILE                                                     
+           RECORDING MODE IS F                                                  
+           LABEL RECORDS ARE STANDARD                                           
+           RECORD CONTAINS 130 CHARACTERS                                       
+           BLOCK CONTAINS 0 RECORDS                                             
+           DATA RECORD IS ERIS-PERSON-REC.                                      
+       01  ERIS-PERSON-REC               PIC X(130).                            
+                                                                                
+       FD  ERIS-PROVIDER-FILE                                                   
+           RECORDING MODE IS F                                                  
+           LABEL RECORDS ARE STANDARD                                           
+           RECORD CONTAINS 130 CHARACTERS                                       
+           BLOCK CONTAINS 0 RECORDS                                             
+           DATA RECORD IS ERIS-PROVIDER-REC.                                    
+       01  ERIS-PROVIDER-REC             PIC X(130).                            
+                                                                                
+       FD  ERIS-VACCINE-FILE                                                    
+           RECORDING MODE IS F                                                  
+           LABEL RECORDS ARE STANDARD                                           
+           RECORD CONTAINS 130 CHARACTERS                                       
+           BLOCK CONTAINS 0 RECORDS                                             
+           DATA RECORD IS ERIS-VACCINE-REC.                                     
+       01  ERIS-VACCINE-REC              PIC X(130).                            
+                                                                                
+       WORKING-STORAGE SECTION.                                                 
+      * End of File switch                                                      
+       77  ERIS-PERSON-EOF               PIC X(01) VALUE SPACE.                 
+           88 PERSON-EOF                 VALUE 'Y'.                             
+       77  ERIS-PROVIDER-EOF             PIC X(01) VALUE SPACE.                 
+           88 PROVIDER-EOF               VALUE 'Y'.                             
+       77  ERIS-VACCINE-EOF              PIC X(01) VALUE SPACE.                 
+           88 VACCINE-EOF                VALUE 'Y'.                             
+                                                                                
+      * Db2 return code                                                         
+       77  SQLCODE-OUT                   PIC S9(03) VALUE 0.                    
+                                                                                
+       01  DELAY-WS.                                                            
+           05  DELAY-LOW-WS              PIC S9(09) BINARY VALUE 500.           
+           05  DELAY-HIGH-WS             PIC S9(09) BINARY VALUE 5000.          
+           05  DELAY-RANDON-WS           PIC S9(09) BINARY.                     
+           05  DELAY-DYNAM-FUNC-WS       PIC X(08).                             
+                                                                                
+       01  PERSON-WS.                                                           
+           05  PERSON-ID-WS              PIC 9(06).                             
+           05  PERSON-NAME-WS.                                                  
+               10 PERSON-FIRST-WS        PIC X(20).                             
+               10 PERSON-LAST-WS         PIC X(20).                             
+           05  PERSON-ADDRESS-WS         PIC X(40).                             
+           05  PERSON-POSTCODE-WS        PIC 9(04).                             
+           05  PERSON-SEX-WS             PIC X(01).                             
+           05  PERSON-DOB-WS.                                                   
+               10 PERSON-DAY-WS          PIC X(02).                             
+               10 PERSON-MONTH-WS        PIC X(02).                             
+               10 PERSON-YEAR-WS         PIC X(04).                             
+           05  PERSON-STATE-WS           PIC X(03) VALUE SPACE.                 
+           05  FILLER                    PIC X(31).                             
+                                                                                
+       01  PROVIDER-WS.                                                         
+           05  PROVIDER-ID-WS            PIC 9(06).                             
+           05  PROVIDER-NAME-WS.                                                
+               10 PROVIDER-FIRST-WS      PIC X(20).                             
+               10 PROVIDER-LAST-WS       PIC X(20).                             
+           05  PROVIDER-ADDRESS-WS       PIC X(40).                             
+           05  PROVIDER-POSTCODE-WS      PIC 9(04).                             
+           05  PERSON-STATE-WS           PIC X(03) VALUE SPACE.                 
+           05  FILLER                    PIC X(37).                             
+                                                                                
+       01  VACCINE-WS.                                                          
+           05  VACCINE-PROVIDER-ID-WS    PIC 9(06).                             
+           05  VACCINE-PERSON-ID-WS      PIC 9(06).                             
+           05  VACCINE-JAB-1-TYPE-WS     PIC X(01).                             
+           05  VACCINE-JAB-1-DATE-WS.                                           
+               10 VACCINE-JAB-1-DAY-WS   PIC X(02).                             
+               10 VACCINE-JAB-1-MONTH-WS PIC X(02).                             
+               10 VACCINE-JAB-1-YEAR-WS  PIC X(04).                             
+           05  VACCINE-JAB-2-TYPE-WS     PIC X(01).                             
+           05  VACCINE-JAB-2-DATE-WS.                                           
+               10 VACCINE-JAB-2-DAY-WS   PIC X(02).                             
+               10 VACCINE-JAB-2-MONTH-WS PIC X(02).                             
+               10 VACCINE-JAB-2-YEAR-WS  PIC X(04).                             
+           05  FILLER                    PIC X(100).                            
+                                                                                
+      *------------------                                                       
+       PROCEDURE DIVISION.                                                      
+      *------------------                                                       
+           PERFORM 000-HOUSEKEEPING.                                            
+           PERFORM 100-MAIN UNTIL PERSON-EOF   AND                              
+                                  PROVIDER-EOF AND                              
+                                  VACCINE-EOF.                                  
+           PERFORM 900-CLOSE-FILES.                                             
+           GOBACK.                                                              
+                                                                                
+       000-HOUSEKEEPING.                                                        
+      * Initialization Routine                                                  
+           INITIALIZE PERSON-WS.                                                
+           INITIALIZE PROVIDER-WS.                                              
+           INITIALIZE VACCINE-WS.                                               
+           PERFORM 300-OPEN-FILES.                                              
+      * Priming Read                                                            
+           PERFORM 400-READ-PERSON-FILE.                                        
+           PERFORM 410-READ-PROVIDER-FILE.                                      
+           PERFORM 420-READ-VACCINE-FILE.                                       
+                                                                                
+       100-MAIN.                                                                
+           DISPLAY PERSON-WS.                                                   
+           DISPLAY PROVIDER-WS.                                                 
+           DISPLAY VACCINE-WS.                                                  
+           IF PERSON-EOF THEN                                                   
+             INITIALIZE PERSON-WS                                               
+           ELSE                                                                 
+             PERFORM 500-RAMDOM-DELAY                                           
+             PERFORM 400-READ-PERSON-FILE                                       
+           END-IF.                                                              
+           IF PROVIDER-EOF THEN                                                 
+             INITIALIZE PROVIDER-WS                                             
+           ELSE                                                                 
+             PERFORM 500-RAMDOM-DELAY                                           
+             PERFORM 410-READ-PROVIDER-FILE                                     
+           END-IF.                                                              
+           IF VACCINE-EOF THEN                                                  
+             INITIALIZE VACCINE-WS                                              
+           ELSE                                                                 
+             PERFORM 500-RAMDOM-DELAY                                           
+             PERFORM 420-READ-VACCINE-FILE                                      
+           END-IF.                                                              
+                                                                                
+       300-OPEN-FILES.                                                          
+           OPEN INPUT ERIS-PERSON-FILE.                                         
+           OPEN INPUT ERIS-PROVIDER-FILE.                                       
+           OPEN INPUT ERIS-VACCINE-FILE.                                        
+                                                                                
+       400-READ-PERSON-FILE.                                                    
+           READ ERIS-PERSON-FILE INTO PERSON-WS                                 
+      * Set AT END Switch                                                       
+               AT END MOVE "Y" TO ERIS-PERSON-EOF                               
+           END-READ.                                                            
+                                                                                
+       410-READ-PROVIDER-FILE.                                                  
+           READ ERIS-PROVIDER-FILE INTO PROVIDER-WS                             
+      * Set AT END Switch                                                       
+               AT END MOVE "Y" TO ERIS-PROVIDER-EOF                             
+           END-READ.                                                            
+                                                                                
+       420-READ-VACCINE-FILE.                                                   
+           READ ERIS-VACCINE-FILE INTO VACCINE-WS                               
+      * Set AT END Switch                                                       
+               AT END MOVE "Y" TO ERIS-VACCINE-EOF                              
+           END-READ.                                                            
+                                                                                
+       500-RAMDOM-DELAY.                                                        
+      * Andrew Mattingly Tools to return random number and delay                
+           MOVE "AMRANDOM" TO DELAY-DYNAM-FUNC-WS.                              
+           CALL DELAY-DYNAM-FUNC-WS USING DELAY-LOW-WS                          
+                                          DELAY-HIGH-WS                         
+                                          DELAY-RANDON-WS.                      
+           DISPLAY "Random low " DELAY-LOW-WS.                                  
+           DISPLAY "Random high " DELAY-HIGH-WS.                                
+           DISPLAY "Delaying for " DELAY-RANDON-WS " milliseconds".             
+           MOVE "AMDELAY" TO DELAY-DYNAM-FUNC-WS.                               
+           CALL DELAY-DYNAM-FUNC-WS USING DELAY-RANDON-WS.                      
+                                                                                
+       900-CLOSE-FILES.                                                         
+           CLOSE ERIS-PERSON-FILE,                                              
+                 ERIS-PROVIDER-FILE,                                            
+                 ERIS-VACCINE-FILE.                                             
+                                                                                
