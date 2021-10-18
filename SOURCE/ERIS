@@ -1,8 +1,8 @@
       *-----------------------                                                  
        IDENTIFICATION DIVISION.                                                 
       *-----------------------                                                  
-       PROGRAM-ID.    ERIS.                                                     
-       AUTHOR.        BENJAMIN THOMPSON.                                        
+       PROGRAM-ID.   ERIS.                                                      
+       AUTHOR.       BENJAMIN THOMPSON.                                         
        DATE-WRITTEN. 18/10/21.                                                  
                                                                                 
       *--------------------                                                     
@@ -27,7 +27,7 @@
            RECORD CONTAINS 130 CHARACTERS                                       
            BLOCK CONTAINS 0 RECORDS                                             
            DATA RECORD IS ERIS-PERSON-REC.                                      
-       01  ERIS-PERSON-REC               PIC X(130).                            
+       01  ERIS-PERSON-REC                PIC X(130).                           
                                                                                 
        FD  ERIS-PROVIDER-FILE                                                   
            RECORDING MODE IS F                                                  
@@ -35,7 +35,7 @@
            RECORD CONTAINS 130 CHARACTERS                                       
            BLOCK CONTAINS 0 RECORDS                                             
            DATA RECORD IS ERIS-PROVIDER-REC.                                    
-       01  ERIS-PROVIDER-REC             PIC X(130).                            
+       01  ERIS-PROVIDER-REC              PIC X(130).                           
                                                                                 
        FD  ERIS-VACCINE-FILE                                                    
            RECORDING MODE IS F                                                  
@@ -43,109 +43,141 @@
            RECORD CONTAINS 130 CHARACTERS                                       
            BLOCK CONTAINS 0 RECORDS                                             
            DATA RECORD IS ERIS-VACCINE-REC.                                     
-       01  ERIS-VACCINE-REC              PIC X(130).                            
+       01  ERIS-VACCINE-REC               PIC X(130).                           
                                                                                 
        WORKING-STORAGE SECTION.                                                 
       * End of File switch                                                      
-       77  ERIS-PERSON-EOF               PIC X(01) VALUE SPACE.                 
-           88 PERSON-EOF                 VALUE 'Y'.                             
-       77  ERIS-PROVIDER-EOF             PIC X(01) VALUE SPACE.                 
-           88 PROVIDER-EOF               VALUE 'Y'.                             
-       77  ERIS-VACCINE-EOF              PIC X(01) VALUE SPACE.                 
-           88 VACCINE-EOF                VALUE 'Y'.                             
+       77 ERIS-PERSON-EOF                 PIC X(01) VALUE SPACE.                
+          88 PERSON-EOF                   VALUE 'Y'.                            
+       77 ERIS-PROVIDER-EOF               PIC X(01) VALUE SPACE.                
+          88 PROVIDER-EOF                 VALUE 'Y'.                            
+       77 ERIS-VACCINE-EOF                PIC X(01) VALUE SPACE.                
+          88 VACCINE-EOF                  VALUE 'Y'.                            
                                                                                 
       * Db2 return code                                                         
-       77  SQLCODE-OUT                   PIC S9(03) VALUE 0.                    
+       77 SQLCODE-OUT                     PIC S9(03) VALUE 0.                   
                                                                                 
-       01  DELAY-WS.                                                            
-           05  DELAY-LOW-WS              PIC S9(09) BINARY VALUE 500.           
-           05  DELAY-HIGH-WS             PIC S9(09) BINARY VALUE 5000.          
-           05  DELAY-RANDON-WS           PIC S9(09) BINARY.                     
-           05  DELAY-DYNAM-FUNC-WS       PIC X(08).                             
+       01 WS-POSTCODE-STATE.                                                    
+          05 WS-POSTCODE                  PIC 9(04).                            
+          05 WS-STATE                     PIC X(03).                            
                                                                                 
-       01  PERSON-WS.                                                           
-           05  PERSON-ID-WS              PIC 9(06).                             
-           05  PERSON-NAME-WS.                                                  
-               10 PERSON-FIRST-WS        PIC X(20).                             
-               10 PERSON-LAST-WS         PIC X(20).                             
-           05  PERSON-ADDRESS-WS         PIC X(40).                             
-           05  PERSON-POSTCODE-WS        PIC 9(04).                             
-           05  PERSON-SEX-WS             PIC X(01).                             
-           05  PERSON-DOB-WS.                                                   
-               10 PERSON-DAY-WS          PIC X(02).                             
-               10 PERSON-MONTH-WS        PIC X(02).                             
-               10 PERSON-YEAR-WS         PIC X(04).                             
-           05  PERSON-STATE-WS           PIC X(03) VALUE SPACE.                 
-           05  FILLER                    PIC X(31).                             
+       01 LK-DELAY.                                                             
+          05 LK-DELAY-LOW                 PIC S9(09) BINARY VALUE 100.          
+          05 LK-DELAY-HIGH                PIC S9(09) BINARY VALUE 500.          
+          05 LK-DELAY-RANDOM              PIC S9(09) BINARY.                    
+          05 LK-DELAY-DYNAM-FUNC          PIC X(08).                            
                                                                                 
-       01  PROVIDER-WS.                                                         
-           05  PROVIDER-ID-WS            PIC 9(06).                             
-           05  PROVIDER-NAME-WS.                                                
-               10 PROVIDER-FIRST-WS      PIC X(20).                             
-               10 PROVIDER-LAST-WS       PIC X(20).                             
-           05  PROVIDER-ADDRESS-WS       PIC X(40).                             
-           05  PROVIDER-POSTCODE-WS      PIC 9(04).                             
-           05  PERSON-STATE-WS           PIC X(03) VALUE SPACE.                 
-           05  FILLER                    PIC X(37).                             
+       01 WS-COUNT.                                                             
+          05 WS-PERSON-COUNT              PIC 9(06).                            
+          05 WS-PROVIDER-COUNT            PIC 9(06).                            
+          05 WS-VACCINE-COUNT             PIC 9(06).                            
                                                                                 
-       01  VACCINE-WS.                                                          
-           05  VACCINE-PROVIDER-ID-WS    PIC 9(06).                             
-           05  VACCINE-PERSON-ID-WS      PIC 9(06).                             
-           05  VACCINE-JAB-1-TYPE-WS     PIC X(01).                             
-           05  VACCINE-JAB-1-DATE-WS.                                           
-               10 VACCINE-JAB-1-DAY-WS   PIC X(02).                             
-               10 VACCINE-JAB-1-MONTH-WS PIC X(02).                             
-               10 VACCINE-JAB-1-YEAR-WS  PIC X(04).                             
-           05  VACCINE-JAB-2-TYPE-WS     PIC X(01).                             
-           05  VACCINE-JAB-2-DATE-WS.                                           
-               10 VACCINE-JAB-2-DAY-WS   PIC X(02).                             
-               10 VACCINE-JAB-2-MONTH-WS PIC X(02).                             
-               10 VACCINE-JAB-2-YEAR-WS  PIC X(04).                             
-           05  FILLER                    PIC X(100).                            
+       01 WS-AUSTRALIAN-DATE.                                                   
+          05 WS-DD                        PIC X(02).                            
+          05 FILLER                       PIC X(01) VALUE ".".                  
+          05 WS-MM                        PIC X(02).                            
+          05 FILLER                       PIC X(01) VALUE ".".                  
+          05 WS-YYYY                      PIC X(04).                            
+                                                                                
+       01 WS-PERSON.                                                            
+          05 WS-PERSON-ID                 PIC 9(06).                            
+          05 WS-PERSON-NAME.                                                    
+             10 WS-PERSON-FIRST-NAME      PIC X(20).                            
+             10 WS-PERSON-SURNAME         PIC X(20).                            
+          05 WS-PERSON-ADDRESS            PIC X(40).                            
+          05 WS-PERSON-POSTCODE           PIC 9(04).                            
+          05 WS-PERSON-SEX                PIC X(01).                            
+          05 WS-PERSON-DOB.                                                     
+             10 WS-PERSON-MONTH           PIC X(02).                            
+             10 WS-PERSON-DAY             PIC X(02).                            
+             10 WS-PERSON-YEAR            PIC X(04).                            
+          05 WS-PERSON-STATE              PIC X(03).                            
+          05 FILLER                       PIC X(31).                            
+                                                                                
+       01 WS-PROVIDER.                                                          
+          05 WS-PROVIDER-ID               PIC 9(06).                            
+          05 WS-PROVIDER-NAME.                                                  
+             10 WS-PROVIDER-FIRST-NAME    PIC X(20).                            
+             10 WS-PROVIDER-SURNAME       PIC X(20).                            
+          05 WS-PROVIDER-ADDRESS          PIC X(40).                            
+          05 WS-PROVIDER-POSTCODE         PIC 9(04).                            
+          05 WS-PERSON-STATE              PIC X(03).                            
+          05 FILLER                       PIC X(37).                            
+                                                                                
+       01 WS-VACCINE.                                                           
+          05 WS-VACCINE-PROVIDER-ID       PIC 9(06).                            
+          05 WS-VACCINE-PERSON-ID         PIC 9(06).                            
+          05 WS-VACCINE-JAB-1-TYPE        PIC X(01).                            
+          05 WS-VACCINE-JAB-1-DATE.                                             
+             10 WS-VACCINE-JAB-1-MONTH    PIC X(02).                            
+             10 WS-VACCINE-JAB-1-DAY      PIC X(02).                            
+             10 WS-VACCINE-JAB-1-YEAR     PIC X(04).                            
+          05 WS-VACCINE-JAB-2-TYPE        PIC X(01).                            
+          05 WS-VACCINE-JAB-2-DATE.                                             
+             10 WS-VACCINE-JAB-2-MONTH    PIC X(02).                            
+             10 WS-VACCINE-JAB-2-DAY      PIC X(02).                            
+             10 WS-VACCINE-JAB-2-YEAR     PIC X(04).                            
+          05 FILLER                       PIC X(100).                           
+                                                                                
+      * PERSON DCLGEN                                                           
+           EXEC SQL                                                             
+             INCLUDE DGERISPE                                                   
+           END-EXEC.                                                            
+                                                                                
+      * PROVIDER DCLGEN                                                         
+           EXEC SQL                                                             
+             INCLUDE DGERISPR                                                   
+           END-EXEC.                                                            
+                                                                                
+      * VACCINATION DCLGEN                                                      
+           EXEC SQL                                                             
+             INCLUDE DGERISVA                                                   
+           END-EXEC.                                                            
+                                                                                
+      * SQL communication area (SQLCA) to check return status                   
+           EXEC SQL                                                             
+              INCLUDE SQLCA                                                     
+           END-EXEC.                                                            
                                                                                 
       *------------------                                                       
        PROCEDURE DIVISION.                                                      
       *------------------                                                       
            PERFORM 000-HOUSEKEEPING.                                            
-           PERFORM 100-MAIN UNTIL PERSON-EOF   AND                              
-                                  PROVIDER-EOF AND                              
-                                  VACCINE-EOF.                                  
+           PERFORM 100-MAIN.                                                    
            PERFORM 900-CLOSE-FILES.                                             
            GOBACK.                                                              
                                                                                 
        000-HOUSEKEEPING.                                                        
       * Initialization Routine                                                  
-           INITIALIZE PERSON-WS.                                                
-           INITIALIZE PROVIDER-WS.                                              
-           INITIALIZE VACCINE-WS.                                               
+           INITIALIZE WS-PERSON.                                                
+           INITIALIZE WS-PROVIDER.                                              
+           INITIALIZE WS-VACCINE.                                               
+           INITIALIZE WS-COUNT.                                                 
            PERFORM 300-OPEN-FILES.                                              
       * Priming Read                                                            
            PERFORM 400-READ-PERSON-FILE.                                        
            PERFORM 410-READ-PROVIDER-FILE.                                      
            PERFORM 420-READ-VACCINE-FILE.                                       
+      * Low and High for Random Delay                                           
+           DISPLAY "RANDOM LOW " LK-DELAY-LOW                                   
+           DISPLAY "RANDOM HIGH " LK-DELAY-HIGH.                                
                                                                                 
        100-MAIN.                                                                
-           DISPLAY PERSON-WS.                                                   
-           DISPLAY PROVIDER-WS.                                                 
-           DISPLAY VACCINE-WS.                                                  
-           IF PERSON-EOF THEN                                                   
-             INITIALIZE PERSON-WS                                               
-           ELSE                                                                 
-             PERFORM 500-RAMDOM-DELAY                                           
-             PERFORM 400-READ-PERSON-FILE                                       
-           END-IF.                                                              
-           IF PROVIDER-EOF THEN                                                 
-             INITIALIZE PROVIDER-WS                                             
-           ELSE                                                                 
-             PERFORM 500-RAMDOM-DELAY                                           
-             PERFORM 410-READ-PROVIDER-FILE                                     
-           END-IF.                                                              
-           IF VACCINE-EOF THEN                                                  
-             INITIALIZE VACCINE-WS                                              
-           ELSE                                                                 
-             PERFORM 500-RAMDOM-DELAY                                           
-             PERFORM 420-READ-VACCINE-FILE                                      
-           END-IF.                                                              
+      * Process PERSON and PROVIDER                                             
+           PERFORM UNTIL PROVIDER-EOF AND PERSON-EOF                            
+           IF NOT PERSON-EOF THEN                                               
+             PERFORM 520-PERSON-INSERT                                          
+           END-IF                                                               
+           IF NOT PROVIDER-EOF THEN                                             
+             PERFORM 530-PROVIDER-INSERT                                        
+           END-IF                                                               
+           END-PERFORM                                                          
+      * Process VACCINE                                                         
+           PERFORM 540-VACCINE-INSERT UNTIL VACCINE-EOF                         
+      * Display total number of records processed for each file                 
+           DISPLAY "PERSON COUNT " WS-PERSON-COUNT                              
+           DISPLAY "PROVIDER TOTAL " WS-PROVIDER-COUNT                          
+           DISPLAY "VACCINE TOTAL" WS-VACCINE-COUNT.                            
                                                                                 
        300-OPEN-FILES.                                                          
            OPEN INPUT ERIS-PERSON-FILE.                                         
@@ -153,34 +185,241 @@
            OPEN INPUT ERIS-VACCINE-FILE.                                        
                                                                                 
        400-READ-PERSON-FILE.                                                    
-           READ ERIS-PERSON-FILE INTO PERSON-WS                                 
+           READ ERIS-PERSON-FILE INTO WS-PERSON                                 
       * Set AT END Switch                                                       
-               AT END MOVE "Y" TO ERIS-PERSON-EOF                               
+             AT END MOVE "Y" TO ERIS-PERSON-EOF                                 
            END-READ.                                                            
                                                                                 
        410-READ-PROVIDER-FILE.                                                  
-           READ ERIS-PROVIDER-FILE INTO PROVIDER-WS                             
+           READ ERIS-PROVIDER-FILE INTO WS-PROVIDER                             
       * Set AT END Switch                                                       
-               AT END MOVE "Y" TO ERIS-PROVIDER-EOF                             
+             AT END MOVE "Y" TO ERIS-PROVIDER-EOF                               
            END-READ.                                                            
                                                                                 
        420-READ-VACCINE-FILE.                                                   
-           READ ERIS-VACCINE-FILE INTO VACCINE-WS                               
+           READ ERIS-VACCINE-FILE INTO WS-VACCINE                               
       * Set AT END Switch                                                       
-               AT END MOVE "Y" TO ERIS-VACCINE-EOF                              
+             AT END MOVE "Y" TO ERIS-VACCINE-EOF                                
            END-READ.                                                            
                                                                                 
-       500-RAMDOM-DELAY.                                                        
+       500-RANDOM-DELAY.                                                        
       * Andrew Mattingly Tools to return random number and delay                
-           MOVE "AMRANDOM" TO DELAY-DYNAM-FUNC-WS.                              
-           CALL DELAY-DYNAM-FUNC-WS USING DELAY-LOW-WS                          
-                                          DELAY-HIGH-WS                         
-                                          DELAY-RANDON-WS.                      
-           DISPLAY "Random low " DELAY-LOW-WS.                                  
-           DISPLAY "Random high " DELAY-HIGH-WS.                                
-           DISPLAY "Delaying for " DELAY-RANDON-WS " milliseconds".             
-           MOVE "AMDELAY" TO DELAY-DYNAM-FUNC-WS.                               
-           CALL DELAY-DYNAM-FUNC-WS USING DELAY-RANDON-WS.                      
+           MOVE "AMRANDOM" TO LK-DELAY-DYNAM-FUNC                               
+      * Generate random number                                                  
+           CALL LK-DELAY-DYNAM-FUNC USING LK-DELAY-LOW                          
+                                          LK-DELAY-HIGH                         
+                                          LK-DELAY-RANDOM.                      
+           MOVE "AMDELAY" TO LK-DELAY-DYNAM-FUNC                                
+      * Delay in milliseconds                                                   
+           CALL LK-DELAY-DYNAM-FUNC USING LK-DELAY-RANDOM.                      
+                                                                                
+       510-VALIDATE-STATE.                                                      
+      * Determine the STATE from the POSTCODE                                   
+           EVALUATE WS-POSTCODE                                                 
+      * NSW                                                                     
+           WHEN 1000 THRU 2599                                                  
+             MOVE 'NSW' TO WS-STATE                                             
+           WHEN 2619 THRU 2899                                                  
+             MOVE 'NSW' TO WS-STATE                                             
+           WHEN 2921 THRU 2999                                                  
+             MOVE 'NSW' TO WS-STATE                                             
+      * ACT                                                                     
+           WHEN 0001 THRU 0299                                                  
+             MOVE 'ACT' TO WS-STATE                                             
+           WHEN 2600 THRU 2618                                                  
+             MOVE 'ACT' TO WS-STATE                                             
+           WHEN 2900 THRU 2920                                                  
+             MOVE 'ACT' TO WS-STATE                                             
+      * VIC                                                                     
+           WHEN 3000 THRU 3999                                                  
+             MOVE 'VIC' TO WS-STATE                                             
+           WHEN 8000 THRU 8999                                                  
+             MOVE 'VIC' TO WS-STATE                                             
+      * QLD                                                                     
+           WHEN 4000 THRU 4999                                                  
+             MOVE 'QLD' TO WS-STATE                                             
+           WHEN 9000 THRU 9999                                                  
+             MOVE 'QLD' TO WS-STATE                                             
+      * SA                                                                      
+           WHEN 5000 THRU 5999                                                  
+             MOVE 'SA' TO WS-STATE                                              
+      * WA                                                                      
+           WHEN 6000 THRU 6999                                                  
+             MOVE 'WA' TO WS-STATE                                              
+      * TAS                                                                     
+           WHEN 7000 THRU 7999                                                  
+             MOVE 'TAS' TO WS-STATE                                             
+      * NT                                                                      
+           WHEN 0300 THRU 0999                                                  
+             MOVE 'NT' TO WS-STATE                                              
+           END-EVALUATE.                                                        
+                                                                                
+       520-PERSON-INSERT.                                                       
+           PERFORM 500-RANDOM-DELAY                                             
+           MOVE WS-PERSON-ID           TO PERSON-ID IN DCLPERSON                
+           MOVE WS-PERSON-FIRST-NAME   TO PERSON-FIRST-NAME                     
+           MOVE WS-PERSON-SURNAME      TO PERSON-SURNAME                        
+           MOVE WS-PERSON-ADDRESS      TO PERSON-ADDRESS                        
+           MOVE WS-PERSON-POSTCODE     TO PERSON-POSTCODE                       
+           MOVE WS-PERSON-SEX          TO PERSON-SEX                            
+      * Fromat date into DD.MM.YYYY                                             
+           MOVE WS-PERSON-DAY          TO WS-DD                                 
+           MOVE WS-PERSON-MONTH        TO WS-MM                                 
+           MOVE WS-PERSON-YEAR         TO WS-YYYY                               
+           MOVE WS-AUSTRALIAN-DATE     TO PERSON-DOB                            
+      * Determine the STATE from the POSTCODE                                   
+           MOVE WS-PERSON-POSTCODE     TO WS-POSTCODE                           
+           PERFORM 510-VALIDATE-STATE                                           
+           MOVE WS-STATE               TO PERSON-STATE                          
+      * SQL insert - one row only                                               
+           EXEC SQL                                                             
+             INSERT INTO ERIS.PERSON                                            
+               (                                                                
+                PERSON_ID,                                                      
+                PERSON_FIRST_NAME,                                              
+                PERSON_SURNAME,                                                 
+                PERSON_ADDRESS,                                                 
+                PERSON_POSTCODE,                                                
+                PERSON_STATE,                                                   
+                PERSON_SEX,                                                     
+                PERSON_DOB                                                      
+               )                                                                
+             VALUES                                                             
+               (                                                                
+                :DCLPERSON.PERSON-ID,                                           
+                :DCLPERSON.PERSON-FIRST-NAME,                                   
+                :DCLPERSON.PERSON-SURNAME,                                      
+                :DCLPERSON.PERSON-ADDRESS,                                      
+                :DCLPERSON.PERSON-POSTCODE,                                     
+                :DCLPERSON.PERSON-STATE,                                        
+                :DCLPERSON.PERSON-SEX,                                          
+                :DCLPERSON.PERSON-DOB                                           
+               )                                                                
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Commit insert                                                           
+           EXEC SQL                                                             
+             COMMIT WORK                                                        
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Total number of successful records processed                            
+           IF SQLCODE EQUAL TO ZERO                                             
+             ADD 1 TO WS-PERSON-COUNT                                           
+             DISPLAY "PERSON COUNT " WS-PERSON-COUNT                            
+           END-IF                                                               
+           PERFORM 400-READ-PERSON-FILE.                                        
+                                                                                
+       530-PROVIDER-INSERT.                                                     
+           PERFORM 500-RANDOM-DELAY                                             
+           MOVE WS-PROVIDER-ID         TO PROVIDER-ID IN DCLPROVIDER            
+           MOVE WS-PROVIDER-FIRST-NAME TO PROVIDER-FIRST-NAME                   
+           MOVE WS-PROVIDER-SURNAME    TO PROVIDER-SURNAME                      
+           MOVE WS-PROVIDER-ADDRESS    TO PROVIDER-ADDRESS                      
+           MOVE WS-PROVIDER-POSTCODE   TO PROVIDER-POSTCODE                     
+           MOVE WS-PROVIDER-POSTCODE   TO WS-POSTCODE                           
+      * Determine the STATE from the POSTCODE                                   
+           PERFORM 510-VALIDATE-STATE                                           
+           MOVE WS-STATE               TO PROVIDER-STATE                        
+      * SQL insert - one row only                                               
+           EXEC SQL                                                             
+             INSERT INTO ERIS.PROVIDER                                          
+               (                                                                
+                PROVIDER_ID,                                                    
+                PROVIDER_FIRST_NAME,                                            
+                PROVIDER_SURNAME,                                               
+                PROVIDER_ADDRESS,                                               
+                PROVIDER_POSTCODE,                                              
+                PROVIDER_STATE                                                  
+               )                                                                
+             VALUES                                                             
+               (                                                                
+                :DCLPROVIDER.PROVIDER-ID,                                       
+                :DCLPROVIDER.PROVIDER-FIRST-NAME,                               
+                :DCLPROVIDER.PROVIDER-SURNAME,                                  
+                :DCLPROVIDER.PROVIDER-ADDRESS,                                  
+                :DCLPROVIDER.PROVIDER-POSTCODE,                                 
+                :DCLPROVIDER.PROVIDER-STATE                                     
+               )                                                                
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Commit insert                                                           
+           EXEC SQL                                                             
+             COMMIT WORK                                                        
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Total number of successful records processed                            
+           IF SQLCODE EQUAL TO ZERO                                             
+             ADD 1 TO WS-PROVIDER-COUNT                                         
+             DISPLAY "PROVIDER COUNT " WS-PROVIDER-COUNT                        
+           END-IF                                                               
+           PERFORM 410-READ-PROVIDER-FILE.                                      
+                                                                                
+       540-VACCINE-INSERT.                                                      
+           PERFORM 500-RANDOM-DELAY                                             
+           DISPLAY WS-VACCINE                                                   
+           MOVE WS-VACCINE-PERSON-ID   TO PERSON-ID IN DCLVACCINATION           
+           MOVE WS-VACCINE-PROVIDER-ID TO PROVIDER-ID IN DCLVACCINATION         
+           MOVE WS-VACCINE-JAB-1-TYPE  TO JAB-1-TYPE                            
+      * Fromat date into DD.MM.YYYY                                             
+           MOVE WS-VACCINE-JAB-1-DAY   TO WS-DD                                 
+           MOVE WS-VACCINE-JAB-1-MONTH TO WS-MM                                 
+           MOVE WS-VACCINE-JAB-1-YEAR  TO WS-YYYY                               
+           MOVE WS-AUSTRALIAN-DATE     TO JAB-1-DATE                            
+      * Test if JAB-2 is empty                                                  
+           IF WS-VACCINE-JAB-2-TYPE NOT EQUAL TO SPACE                          
+             MOVE WS-VACCINE-JAB-2-TYPE  TO JAB-2-TYPE                          
+      * Fromat date into DD.MM.YYYY                                             
+             MOVE WS-VACCINE-JAB-2-DAY   TO WS-DD                               
+             MOVE WS-VACCINE-JAB-2-MONTH TO WS-MM                               
+             MOVE WS-VACCINE-JAB-2-YEAR  TO WS-YYYY                             
+             MOVE WS-AUSTRALIAN-DATE     TO JAB-2-DATE                          
+           END-IF                                                               
+      * SQL insert - one row only                                               
+           EXEC SQL                                                             
+             INSERT INTO ERIS.VACCINATION                                       
+               (                                                                
+                PERSON_ID,                                                      
+                PROVIDER_ID,                                                    
+                JAB_1_TYPE,                                                     
+                JAB_1_DATE,                                                     
+                JAB_2_TYPE,                                                     
+                JAB_2_DATE                                                      
+               )                                                                
+             VALUES                                                             
+               (                                                                
+                :DCLVACCINATION.PERSON-ID,                                      
+                :DCLVACCINATION.PROVIDER-ID,                                    
+                :DCLVACCINATION.JAB-1-TYPE,                                     
+                :DCLVACCINATION.JAB-1-DATE,                                     
+                :DCLVACCINATION.JAB-2-TYPE,                                     
+                :DCLVACCINATION.JAB-2-DATE                                      
+               )                                                                
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Commit insert                                                           
+           EXEC SQL                                                             
+             COMMIT WORK                                                        
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Total number of successful records processed                            
+           IF SQLCODE EQUAL TO ZERO                                             
+             ADD 1 TO WS-VACCINE-COUNT                                          
+             DISPLAY "VACCINE COUNT " WS-VACCINE-COUNT                          
+           END-IF                                                               
+           PERFORM 420-READ-VACCINE-FILE.                                       
+                                                                                
+       800-SQL-RETURN-CODE.                                                     
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+             DISPLAY 'SQL ERROR '                                               
+                     ' SQLCODE : ' SQLCODE                                      
+                     ' SQLSTATE  :' SQLSTATE                                    
+           END-IF.                                                              
                                                                                 
        900-CLOSE-FILES.                                                         
            CLOSE ERIS-PERSON-FILE,                                              

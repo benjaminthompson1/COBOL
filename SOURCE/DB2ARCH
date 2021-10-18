@@ -17,18 +17,18 @@
            RECORD CONTAINS 80 CHARACTERS                                        
            BLOCK CONTAINS 0 RECORDS                                             
            DATA RECORD IS IMMUNISATION-REC.                                     
-       01  IMMUNISATION-REC          PIC X(80).                                 
+       01  IMMUNISATION-REC              PIC X(80).                             
                                                                                 
        WORKING-STORAGE SECTION.                                                 
       * End of File switch                                                      
-       77  IMMUNISATION-EOF          PIC X(01) VALUE SPACE.                     
-           88 END-OF-FILE            VALUE 'Y'.                                 
+       77  IMMUNISATION-EOF              PIC X(01) VALUE SPACE.                 
+           88 END-OF-FILE                VALUE 'Y'.                             
       * Db2 return code                                                         
-       77  SQLCODE-OUT               PIC S9(03) VALUE 0.                        
+       77  SQLCODE-OUT                   PIC S9(03) VALUE 0.                    
       * Db2 SYSIBMADM.MOVE_TO_ARCHIVE built-in global variable                  
-       77  DB2-MOVE-TO-ARCHIVE       PIC X(01) VALUE 'N'.                       
+       77  DB2-MOVE-TO-ARCHIVE           PIC X(01) VALUE 'N'.                   
       * Db2 SYSIBMADM.GET_ARCHIVE built-in global variable                      
-       77  DB2-GET-ARCHIVE           PIC X(01) VALUE 'N'.                       
+       77  DB2-GET-ARCHIVE               PIC X(01) VALUE 'N'.                   
                                                                                 
       * Program operation                                                       
       * LD = LOAD                                                               
@@ -37,27 +37,27 @@
       * SB = BASE ONLY                                                          
       * SA = ARCHIVE ONLY                                                       
       * SS = BOTH                                                               
-       01  IMMUNISATION-WS.                                                     
-           05  OPERATION              PIC X(02).                                
-           05  IMMUNISATION-DATA      PIC X(78).                                
+       01  WS-IMMUNISATION.                                                     
+           05  WS-OPERATION              PIC X(02).                             
+           05  WS-IMMUNISATION-DATA      PIC X(78).                             
                                                                                 
-       01  INSERT-IMMUNISATION-WS.                                              
-           10 INSERT-PERSON-ID        PIC 9(4).                                 
-           10 INSERT-VACCINATION-TYPE PIC X(5).                                 
-           10 INSERT-VACCINATION-DATE PIC X(10).                                
-           10 FILLER                  PIC X(59).                                
+       01  WS-INSERT-IMMUNISATION.                                              
+           10 WS-INSERT-PERSON-ID        PIC 9(4).                              
+           10 WS-INSERT-VACCINATION-TYPE PIC X(5).                              
+           10 WS-INSERT-VACCINATION-DATE PIC X(10).                             
+           10 FILLER                     PIC X(59).                             
                                                                                 
-       01  DELETE-IMMUNISATION-WS.                                              
-           10 DELETE-PERSON-ID        PIC 9(4).                                 
-           10 FILLER                  PIC X(74).                                
+       01  WS-DELETE-IMMUNISATION.                                              
+           10 WS-DELETE-PERSON-ID        PIC 9(4).                              
+           10 FILLER                     PIC X(74).                             
                                                                                 
-       01  SELECT-IMMUNISATION-WS.                                              
-           10 SELECT-PERSON-ID        PIC 9(4).                                 
-           10 FILLER                  PIC X(74).                                
+       01  WS-SELECT-IMMUNISATION.                                              
+           10 WS-SELECT-PERSON-ID        PIC 9(4).                              
+           10 FILLER                     PIC X(74).                             
                                                                                 
       * IMMUNISATION DCLGEN                                                     
            EXEC SQL                                                             
-              INCLUDE IMMUN                                                     
+              INCLUDE DGIMMUNI                                                  
            END-EXEC.                                                            
                                                                                 
       * SQL communication area (SQLCA) to check return status                   
@@ -72,13 +72,16 @@
            GOBACK.                                                              
                                                                                 
        000-Housekeeping.                                                        
-           INITIALIZE IMMUNISATION-WS.                                          
+           INITIALIZE WS-IMMUNISATION.                                          
+           INITIALIZE WS-INSERT-IMMUNISATION.                                   
+           INITIALIZE WS-DELETE-IMMUNISATION.                                   
+           INITIALIZE WS-SELECT-IMMUNISATION.                                   
            PERFORM 300-Open-Files.                                              
       * Priming Read                                                            
            PERFORM 400-Read-IN-PARM.                                            
                                                                                 
        100-Main.                                                                
-           EVALUATE OPERATION                                                   
+           EVALUATE WS-OPERATION                                                
            WHEN 'LD'                                                            
               DISPLAY 'LOAD'                                                    
               PERFORM 500-Immunisation-Insert                                   
@@ -109,16 +112,16 @@
            OPEN INPUT IMMUN-IN.                                                 
                                                                                 
        400-Read-IN-PARM.                                                        
-           READ IMMUN-IN INTO IMMUNISATION-WS                                   
+           READ IMMUN-IN INTO WS-IMMUNISATION                                   
       * Set AT END Switch                                                       
               AT END MOVE 'Y' TO IMMUNISATION-EOF                               
            END-READ.                                                            
                                                                                 
        500-Immunisation-Insert.                                                 
-           MOVE IMMUNISATION-DATA       TO INSERT-IMMUNISATION-WS               
-           MOVE INSERT-PERSON-ID        TO PERSON-ID                            
-           MOVE INSERT-VACCINATION-TYPE TO VACCINATION-TYPE                     
-           MOVE INSERT-VACCINATION-DATE TO VACCINATION-DATE                     
+           MOVE WS-IMMUNISATION-DATA       TO WS-INSERT-IMMUNISATION            
+           MOVE WS-INSERT-PERSON-ID        TO PERSON-ID                         
+           MOVE WS-INSERT-VACCINATION-TYPE TO VACCINATION-TYPE                  
+           MOVE WS-INSERT-VACCINATION-DATE TO VACCINATION-DATE                  
       * SQL insert - one row only                                               
            EXEC SQL                                                             
               INSERT INTO IBMUSER.IMMUNISATION                                  
@@ -147,10 +150,10 @@
                    ' VACCINATION-DATE = ' VACCINATION-DATE.                     
                                                                                 
        510-Immunisation-Delete.                                                 
-           MOVE IMMUNISATION-DATA       TO DELETE-IMMUNISATION-WS               
-           MOVE DELETE-PERSON-ID        TO PERSON-ID                            
+           MOVE WS-IMMUNISATION-DATA       TO WS-DELETE-IMMUNISATION            
+           MOVE WS-DELETE-PERSON-ID        TO PERSON-ID                         
       * Determin Delete or Archive                                              
-           IF OPERATION = 'DD'                                                  
+           IF WS-OPERATION = 'DD'                                               
               MOVE 'N' TO DB2-MOVE-TO-ARCHIVE                                   
            ELSE                                                                 
               MOVE 'Y' TO DB2-MOVE-TO-ARCHIVE                                   
@@ -183,10 +186,10 @@
            PERFORM 800-SQL-Return-Codes.                                        
                                                                                 
        520-Immunisation-Select-Base.                                            
-           MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
-           MOVE SELECT-PERSON-ID        TO PERSON-ID                            
+           MOVE WS-IMMUNISATION-DATA       TO WS-SELECT-IMMUNISATION            
+           MOVE WS-SELECT-PERSON-ID        TO PERSON-ID                         
       * Determin Select Base or Base and Archive                                
-           IF OPERATION = 'SB'                                                  
+           IF WS-OPERATION = 'SB'                                               
               MOVE 'N' TO DB2-GET-ARCHIVE                                       
            ELSE                                                                 
               MOVE 'Y' TO DB2-GET-ARCHIVE                                       
@@ -223,8 +226,8 @@
                    ' VACCINATION-DATE = ' VACCINATION-DATE.                     
                                                                                 
        530-Immunisation-Select-Arch.                                            
-           MOVE IMMUNISATION-DATA       TO SELECT-IMMUNISATION-WS               
-           MOVE SELECT-PERSON-ID        TO PERSON-ID                            
+           MOVE WS-IMMUNISATION-DATA       TO WS-SELECT-IMMUNISATION            
+           MOVE WS-SELECT-PERSON-ID        TO PERSON-ID                         
       * SQL select - one row only                                               
            EXEC SQL                                                             
                 SELECT * INTO :DCLIMMUNISATION                                  
@@ -249,7 +252,7 @@
                       ' SQLCODE : ' SQLCODE                                     
                       ' SQLSTATE  :' SQLSTATE                                   
                       ' PERSON-ID : ' PERSON-ID                                 
-                      ' OPERATION-TYPE : ' OPERATION                            
+                      ' OPERATION-TYPE : ' WS-OPERATION                         
            END-IF.                                                              
                                                                                 
        900-Close-Files.                                                         
