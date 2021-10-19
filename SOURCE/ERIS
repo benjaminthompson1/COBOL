@@ -3,7 +3,7 @@
       *-----------------------                                                  
        PROGRAM-ID.   ERIS.                                                      
        AUTHOR.       BENJAMIN THOMPSON.                                         
-       DATE-WRITTEN. 18/10/21.                                                  
+       DATE-WRITTEN. 19/10/21.                                                  
                                                                                 
       *--------------------                                                     
        ENVIRONMENT DIVISION.                                                    
@@ -57,26 +57,32 @@
       * Db2 return code                                                         
        77 SQLCODE-OUT                     PIC S9(03) VALUE 0.                   
                                                                                 
-       01 WS-POSTCODE-STATE.                                                    
-          05 WS-POSTCODE                  PIC 9(04).                            
-          05 WS-STATE                     PIC X(03).                            
-                                                                                
+      * Linkage variables                                                       
        01 LK-DELAY.                                                             
           05 LK-DELAY-LOW                 PIC S9(09) BINARY VALUE 100.          
           05 LK-DELAY-HIGH                PIC S9(09) BINARY VALUE 500.          
           05 LK-DELAY-RANDOM              PIC S9(09) BINARY.                    
           05 LK-DELAY-DYNAM-FUNC          PIC X(08).                            
                                                                                 
+      * Working Storage variables                                               
+       01 WS-POSTCODE-STATE.                                                    
+          05 WS-POSTCODE                  PIC 9(04).                            
+          05 WS-STATE                     PIC X(03).                            
+                                                                                
        01 WS-COUNT.                                                             
-          05 WS-PERSON-COUNT              PIC 9(06).                            
-          05 WS-PROVIDER-COUNT            PIC 9(06).                            
-          05 WS-VACCINE-COUNT             PIC 9(06).                            
+          05 WS-PERSON-READ-TOTAL         PIC 9(06).                            
+          05 WS-PROVIDER-READ-TOTAL       PIC 9(06).                            
+          05 WS-VACCINE-READ-TOTAL        PIC 9(06).                            
+          05 WS-PERSON-INSERT-TOTAL       PIC 9(06).                            
+          05 WS-PROVIDER-INSERT-TOTAL     PIC 9(06).                            
+          05 WS-VACCINE-INSERT-TOTAL      PIC 9(06).                            
+          05 WS-DB2-ERROR-TOTAL           PIC 9(06).                            
                                                                                 
        01 WS-AUSTRALIAN-DATE.                                                   
           05 WS-DD                        PIC X(02).                            
-          05 FILLER                       PIC X(01) VALUE ".".                  
+          05 FILLER                       PIC X(01) VALUE '.'.                  
           05 WS-MM                        PIC X(02).                            
-          05 FILLER                       PIC X(01) VALUE ".".                  
+          05 FILLER                       PIC X(01) VALUE '.'.                  
           05 WS-YYYY                      PIC X(04).                            
                                                                                 
        01 WS-PERSON.                                                            
@@ -159,11 +165,12 @@
            PERFORM 410-READ-PROVIDER-FILE.                                      
            PERFORM 420-READ-VACCINE-FILE.                                       
       * Low and High for Random Delay                                           
-           DISPLAY "RANDOM LOW " LK-DELAY-LOW                                   
-           DISPLAY "RANDOM HIGH " LK-DELAY-HIGH.                                
+           DISPLAY 'RANDOM LOW :' LK-DELAY-LOW                                  
+                   ' RANDOM HIGH :' LK-DELAY-HIGH.                              
                                                                                 
        100-MAIN.                                                                
       * Process PERSON and PROVIDER                                             
+           MOVE "Y" TO ERIS-PROVIDER-EOF,ERIS-PERSON-EOF                        
            PERFORM UNTIL PROVIDER-EOF AND PERSON-EOF                            
            IF NOT PERSON-EOF THEN                                               
              PERFORM 520-PERSON-INSERT                                          
@@ -174,10 +181,15 @@
            END-PERFORM                                                          
       * Process VACCINE                                                         
            PERFORM 540-VACCINE-INSERT UNTIL VACCINE-EOF                         
-      * Display total number of records processed for each file                 
-           DISPLAY "PERSON COUNT " WS-PERSON-COUNT                              
-           DISPLAY "PROVIDER TOTAL " WS-PROVIDER-COUNT                          
-           DISPLAY "VACCINE TOTAL" WS-VACCINE-COUNT.                            
+      * Display total number of records READ for each file                      
+           DISPLAY 'PERSON READ TOTAL :' WS-PERSON-READ-TOTAL                   
+                   ' PROVIDER READ TOTAL :' WS-PROVIDER-READ-TOTAL              
+                   ' VACCINE READ TOTAL :' WS-VACCINE-READ-TOTAL                
+      * Display total number of records INSERTED for each file                  
+           DISPLAY 'PERSON INSERT TOTAL :' WS-PERSON-INSERT-TOTAL               
+                   ' PROVIDER INSERT TOTAL :' WS-PROVIDER-INSERT-TOTAL          
+                   ' VACCINE INSERT TOTAL :' WS-VACCINE-INSERT-TOTAL            
+           DISPLAY 'DB2 ERROR TOTAL :' WS-DB2-ERROR-TOTAL.                      
                                                                                 
        300-OPEN-FILES.                                                          
            OPEN INPUT ERIS-PERSON-FILE.                                         
@@ -187,29 +199,29 @@
        400-READ-PERSON-FILE.                                                    
            READ ERIS-PERSON-FILE INTO WS-PERSON                                 
       * Set AT END Switch                                                       
-             AT END MOVE "Y" TO ERIS-PERSON-EOF                                 
+             AT END MOVE 'Y' TO ERIS-PERSON-EOF                                 
            END-READ.                                                            
                                                                                 
        410-READ-PROVIDER-FILE.                                                  
            READ ERIS-PROVIDER-FILE INTO WS-PROVIDER                             
       * Set AT END Switch                                                       
-             AT END MOVE "Y" TO ERIS-PROVIDER-EOF                               
+             AT END MOVE 'Y' TO ERIS-PROVIDER-EOF                               
            END-READ.                                                            
                                                                                 
        420-READ-VACCINE-FILE.                                                   
            READ ERIS-VACCINE-FILE INTO WS-VACCINE                               
       * Set AT END Switch                                                       
-             AT END MOVE "Y" TO ERIS-VACCINE-EOF                                
+             AT END MOVE 'Y' TO ERIS-VACCINE-EOF                                
            END-READ.                                                            
                                                                                 
        500-RANDOM-DELAY.                                                        
       * Andrew Mattingly Tools to return random number and delay                
-           MOVE "AMRANDOM" TO LK-DELAY-DYNAM-FUNC                               
+           MOVE 'AMRANDOM' TO LK-DELAY-DYNAM-FUNC                               
       * Generate random number                                                  
            CALL LK-DELAY-DYNAM-FUNC USING LK-DELAY-LOW                          
                                           LK-DELAY-HIGH                         
                                           LK-DELAY-RANDOM.                      
-           MOVE "AMDELAY" TO LK-DELAY-DYNAM-FUNC                                
+           MOVE 'AMDELAY' TO LK-DELAY-DYNAM-FUNC                                
       * Delay in milliseconds                                                   
            CALL LK-DELAY-DYNAM-FUNC USING LK-DELAY-RANDOM.                      
                                                                                 
@@ -298,17 +310,21 @@
            END-EXEC                                                             
       * Check SQL returncode                                                    
            PERFORM 800-SQL-RETURN-CODE                                          
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Total number of successful records processed                            
+           IF SQLCODE EQUAL TO ZERO                                             
+             ADD 1 TO WS-PERSON-INSERT-TOTAL                                    
+           ELSE                                                                 
+             DISPLAY 'ERROR PERSON RECORD :' WS-PERSON                          
+           END-IF                                                               
       * Commit insert                                                           
            EXEC SQL                                                             
              COMMIT WORK                                                        
            END-EXEC                                                             
       * Check SQL returncode                                                    
            PERFORM 800-SQL-RETURN-CODE                                          
-      * Total number of successful records processed                            
-           IF SQLCODE EQUAL TO ZERO                                             
-             ADD 1 TO WS-PERSON-COUNT                                           
-             DISPLAY "PERSON COUNT " WS-PERSON-COUNT                            
-           END-IF                                                               
+           ADD 1 TO WS-PERSON-READ-TOTAL                                        
            PERFORM 400-READ-PERSON-FILE.                                        
                                                                                 
        530-PROVIDER-INSERT.                                                     
@@ -345,22 +361,25 @@
            END-EXEC                                                             
       * Check SQL returncode                                                    
            PERFORM 800-SQL-RETURN-CODE                                          
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-RETURN-CODE                                          
+      * Total number of successful records processed                            
+           IF SQLCODE EQUAL TO ZERO                                             
+             ADD 1 TO WS-PROVIDER-INSERT-TOTAL                                  
+           ELSE                                                                 
+             DISPLAY 'ERROR PROVIDER RECORD :' WS-PROVIDER                      
+           END-IF                                                               
       * Commit insert                                                           
            EXEC SQL                                                             
              COMMIT WORK                                                        
            END-EXEC                                                             
       * Check SQL returncode                                                    
            PERFORM 800-SQL-RETURN-CODE                                          
-      * Total number of successful records processed                            
-           IF SQLCODE EQUAL TO ZERO                                             
-             ADD 1 TO WS-PROVIDER-COUNT                                         
-             DISPLAY "PROVIDER COUNT " WS-PROVIDER-COUNT                        
-           END-IF                                                               
+           ADD 1 TO WS-PROVIDER-READ-TOTAL                                      
            PERFORM 410-READ-PROVIDER-FILE.                                      
                                                                                 
        540-VACCINE-INSERT.                                                      
            PERFORM 500-RANDOM-DELAY                                             
-           DISPLAY WS-VACCINE                                                   
            MOVE WS-VACCINE-PERSON-ID   TO PERSON-ID IN DCLVACCINATION           
            MOVE WS-VACCINE-PROVIDER-ID TO PROVIDER-ID IN DCLVACCINATION         
            MOVE WS-VACCINE-JAB-1-TYPE  TO JAB-1-TYPE                            
@@ -377,48 +396,69 @@
              MOVE WS-VACCINE-JAB-2-MONTH TO WS-MM                               
              MOVE WS-VACCINE-JAB-2-YEAR  TO WS-YYYY                             
              MOVE WS-AUSTRALIAN-DATE     TO JAB-2-DATE                          
+      * SQL insert - one row only JAB 2 complete                                
+             EXEC SQL                                                           
+               INSERT INTO ERIS.VACCINATION                                     
+                 (                                                              
+                  PERSON_ID,                                                    
+                  PROVIDER_ID,                                                  
+                  JAB_1_TYPE,                                                   
+                  JAB_1_DATE,                                                   
+                  JAB_2_TYPE,                                                   
+                  JAB_2_DATE                                                    
+                 )                                                              
+               VALUES                                                           
+                 (                                                              
+                  :DCLVACCINATION.PERSON-ID,                                    
+                  :DCLVACCINATION.PROVIDER-ID,                                  
+                  :DCLVACCINATION.JAB-1-TYPE,                                   
+                  :DCLVACCINATION.JAB-1-DATE,                                   
+                  :DCLVACCINATION.JAB-2-TYPE,                                   
+                  :DCLVACCINATION.JAB-2-DATE                                    
+                 )                                                              
+             END-EXEC                                                           
+           ELSE                                                                 
+      * SQL insert - one row only JAB-2 NULL                                    
+             EXEC SQL                                                           
+               INSERT INTO ERIS.VACCINATION                                     
+                 (                                                              
+                  PERSON_ID,                                                    
+                  PROVIDER_ID,                                                  
+                  JAB_1_TYPE,                                                   
+                  JAB_1_DATE                                                    
+                 )                                                              
+               VALUES                                                           
+                 (                                                              
+                  :DCLVACCINATION.PERSON-ID,                                    
+                  :DCLVACCINATION.PROVIDER-ID,                                  
+                  :DCLVACCINATION.JAB-1-TYPE,                                   
+                  :DCLVACCINATION.JAB-1-DATE                                    
+                 )                                                              
+             END-EXEC                                                           
            END-IF                                                               
-      * SQL insert - one row only                                               
-           EXEC SQL                                                             
-             INSERT INTO ERIS.VACCINATION                                       
-               (                                                                
-                PERSON_ID,                                                      
-                PROVIDER_ID,                                                    
-                JAB_1_TYPE,                                                     
-                JAB_1_DATE,                                                     
-                JAB_2_TYPE,                                                     
-                JAB_2_DATE                                                      
-               )                                                                
-             VALUES                                                             
-               (                                                                
-                :DCLVACCINATION.PERSON-ID,                                      
-                :DCLVACCINATION.PROVIDER-ID,                                    
-                :DCLVACCINATION.JAB-1-TYPE,                                     
-                :DCLVACCINATION.JAB-1-DATE,                                     
-                :DCLVACCINATION.JAB-2-TYPE,                                     
-                :DCLVACCINATION.JAB-2-DATE                                      
-               )                                                                
-           END-EXEC                                                             
       * Check SQL returncode                                                    
            PERFORM 800-SQL-RETURN-CODE                                          
+      * Total number of successful records processed                            
+           IF SQLCODE EQUAL TO ZERO                                             
+             ADD 1 TO WS-VACCINE-INSERT-TOTAL                                   
+           ELSE                                                                 
+             DISPLAY 'ERROR VACCINE RECORD :' WS-VACCINE                        
+           END-IF                                                               
       * Commit insert                                                           
            EXEC SQL                                                             
              COMMIT WORK                                                        
            END-EXEC                                                             
       * Check SQL returncode                                                    
            PERFORM 800-SQL-RETURN-CODE                                          
-      * Total number of successful records processed                            
-           IF SQLCODE EQUAL TO ZERO                                             
-             ADD 1 TO WS-VACCINE-COUNT                                          
-             DISPLAY "VACCINE COUNT " WS-VACCINE-COUNT                          
-           END-IF                                                               
+           ADD 1 TO WS-VACCINE-READ-TOTAL                                       
            PERFORM 420-READ-VACCINE-FILE.                                       
                                                                                 
        800-SQL-RETURN-CODE.                                                     
            IF SQLCODE NOT EQUAL TO ZERO                                         
              DISPLAY 'SQL ERROR '                                               
-                     ' SQLCODE : ' SQLCODE                                      
+                     ' SQLCODE :' SQLCODE                                       
                      ' SQLSTATE  :' SQLSTATE                                    
+             ADD 1 TO WS-DB2-ERROR-TOTAL                                        
            END-IF.                                                              
                                                                                 
        900-CLOSE-FILES.                                                         
