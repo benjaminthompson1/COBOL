@@ -10,11 +10,13 @@
       *--------------------                                                     
        INPUT-OUTPUT SECTION.                                                    
        FILE-CONTROL.                                                            
-           SELECT ERIS-PERSON-FILE ASSIGN TO UT-S-ERISPER                       
+           SELECT ERIS-PERSON-FILE   ASSIGN TO UT-S-ERISPER                     
            ORGANIZATION IS SEQUENTIAL.                                          
            SELECT ERIS-PROVIDER-FILE ASSIGN TO UT-S-ERISPRO                     
            ORGANIZATION IS SEQUENTIAL.                                          
-           SELECT ERIS-VACCINE-FILE ASSIGN TO UT-S-ERISVAC                      
+           SELECT ERIS-VACCINE-FILE  ASSIGN TO UT-S-ERISVAC                     
+           ORGANIZATION IS SEQUENTIAL.                                          
+           SELECT ERIS-PARM-FILE     ASSIGN TO UT-S-ERISPRM                     
            ORGANIZATION IS SEQUENTIAL.                                          
                                                                                 
       *-------------                                                            
@@ -45,6 +47,14 @@
            DATA RECORD IS ERIS-VACCINE-REC.                                     
        01  ERIS-VACCINE-REC               PIC X(130).                           
                                                                                 
+       FD  ERIS-PARM-FILE                                                       
+           RECORDING MODE IS F                                                  
+           LABEL RECORDS ARE STANDARD                                           
+           RECORD CONTAINS 80 CHARACTERS                                        
+           BLOCK CONTAINS 0 RECORDS                                             
+           DATA RECORD IS ERIS-PARM-REC.                                        
+       01  ERIS-PARM-REC                  PIC X(80).                            
+                                                                                
        WORKING-STORAGE SECTION.                                                 
       * End of File switch                                                      
        77 ERIS-PERSON-EOF                 PIC X(01) VALUE SPACE.                
@@ -53,14 +63,16 @@
           88 PROVIDER-EOF                 VALUE 'Y'.                            
        77 ERIS-VACCINE-EOF                PIC X(01) VALUE SPACE.                
           88 VACCINE-EOF                  VALUE 'Y'.                            
+       77 ERIS-PARM-EOF                   PIC X(01) VALUE SPACE.                
+          88 PARM-EOF                     VALUE 'Y'.                            
                                                                                 
       * Db2 return code                                                         
        77 SQLCODE-OUT                     PIC S9(03) VALUE 0.                   
                                                                                 
       * Linkage variables                                                       
        01 LK-DELAY.                                                             
-          05 LK-DELAY-LOW                 PIC S9(09) BINARY VALUE 100.          
-          05 LK-DELAY-HIGH                PIC S9(09) BINARY VALUE 500.          
+          05 LK-DELAY-LOW                 PIC S9(09) BINARY.                    
+          05 LK-DELAY-HIGH                PIC S9(09) BINARY.                    
           05 LK-DELAY-RANDOM              PIC S9(09) BINARY.                    
           05 LK-DELAY-DYNAM-FUNC          PIC X(08).                            
                                                                                 
@@ -125,6 +137,12 @@
              10 WS-VACCINE-JAB-2-YEAR     PIC X(04).                            
           05 FILLER                       PIC X(100).                           
                                                                                 
+       01 WS-PARM.                                                              
+          05 WS-PARM-DELAY-LOW            PIC 9(08).                            
+          05 FILLER                       PIC X(01).                            
+          05 WS-PARM-DELAY-HIGH           PIC 9(08).                            
+          05 FILLER                       PIC X(63).                            
+                                                                                
       * PERSON DCLGEN                                                           
            EXEC SQL                                                             
              INCLUDE DGERISPE                                                   
@@ -158,19 +176,22 @@
            INITIALIZE WS-PERSON.                                                
            INITIALIZE WS-PROVIDER.                                              
            INITIALIZE WS-VACCINE.                                               
+           INITIALIZE WS-PARM.                                                  
            INITIALIZE WS-COUNT.                                                 
            PERFORM 300-OPEN-FILES.                                              
       * Priming Read                                                            
            PERFORM 400-READ-PERSON-FILE.                                        
            PERFORM 410-READ-PROVIDER-FILE.                                      
            PERFORM 420-READ-VACCINE-FILE.                                       
+           PERFORM 430-READ-PARM-FILE.                                          
+           MOVE WS-PARM-DELAY-LOW  TO LK-DELAY-LOW                              
+           MOVE WS-PARM-DELAY-HIGH TO LK-DELAY-HIGH                             
       * Low and High for Random Delay                                           
            DISPLAY 'RANDOM LOW :' LK-DELAY-LOW                                  
                    ' RANDOM HIGH :' LK-DELAY-HIGH.                              
                                                                                 
        100-MAIN.                                                                
       * Process PERSON and PROVIDER                                             
-           MOVE "Y" TO ERIS-PROVIDER-EOF,ERIS-PERSON-EOF                        
            PERFORM UNTIL PROVIDER-EOF AND PERSON-EOF                            
            IF NOT PERSON-EOF THEN                                               
              PERFORM 520-PERSON-INSERT                                          
@@ -195,6 +216,7 @@
            OPEN INPUT ERIS-PERSON-FILE.                                         
            OPEN INPUT ERIS-PROVIDER-FILE.                                       
            OPEN INPUT ERIS-VACCINE-FILE.                                        
+           OPEN INPUT ERIS-PARM-FILE.                                           
                                                                                 
        400-READ-PERSON-FILE.                                                    
            READ ERIS-PERSON-FILE INTO WS-PERSON                                 
@@ -212,6 +234,12 @@
            READ ERIS-VACCINE-FILE INTO WS-VACCINE                               
       * Set AT END Switch                                                       
              AT END MOVE 'Y' TO ERIS-VACCINE-EOF                                
+           END-READ.                                                            
+                                                                                
+       430-READ-PARM-FILE.                                                      
+           READ ERIS-PARM-FILE INTO WS-PARM                                     
+      * Set AT END Switch                                                       
+             AT END MOVE 'Y' TO ERIS-PARM-EOF                                   
            END-READ.                                                            
                                                                                 
        500-RANDOM-DELAY.                                                        
@@ -464,5 +492,6 @@
        900-CLOSE-FILES.                                                         
            CLOSE ERIS-PERSON-FILE,                                              
                  ERIS-PROVIDER-FILE,                                            
-                 ERIS-VACCINE-FILE.                                             
+                 ERIS-VACCINE-FILE,                                             
+                 ERIS-PARM-FILE.                                                
                                                                                 
