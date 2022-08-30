@@ -1,0 +1,29 @@
+      ******************************************************************        
+      * Progam: CHKCODE                                                         
+      * Purpose: Check if tour code is valid                                    
+      ******************************************************************        
+       IDENTIFICATION DIVISION.                                                 
+        PROGRAM-ID. 'CHKCODE'.                                                  
+       DATA DIVISION.                                                           
+       WORKING-STORAGE SECTION.                                                 
+       01 CMPTMPN PIC S9(9) COMP.                                               
+       01 CMPTMPI PIC S9(9) COMP.                                               
+       01 CHARTMP PIC X.                                                        
+       01 SWAPPED PIC X.                                                        
+       LINKAGE SECTION.                                                         
+       01 TOUR-CODE             PIC X(03).                                      
+       01 RESULT-CODE   PIC X(01).                                              
+          88 CODE-VALID  VALUE 'V'.                                             
+          88 CODE-INVALID VALUE 'I'.                                            
+       PROCEDURE DIVISION USING TOUR-CODE RESULT-CODE.                          
+       MAINLINE SECTION.                                                        
+           IF TOUR-CODE(1:1) EQUAL "A" OR                                       
+               TOUR-CODE(1:1) EQUAL "E"                                         
+              DISPLAY 'CHKCODE VALID'                                           
+              SET CODE-VALID TO TRUE                                            
+           ELSE                                                                 
+              DISPLAY 'CHKCODE INVALID'                                         
+              SET CODE-INVALID TO TRUE                                          
+           END-IF                                                               
+           .                                                                    
+       END PROGRAM 'CHKCODE'.                                                   
