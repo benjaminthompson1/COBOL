@@ -31,4 +31,4 @@
              DISPLAY 'Current Time - 'WS-CURRENT-HOURS':'                       
                 WS-CURRENT-MINUTE.                                              
              DISPLAY ' '.                                                       
-             DISPLAY 'HELLO WORLD'.                                             
+             DISPLAY 'HELLO-WORLD'.                                             
