@@ -27,8 +27,6 @@ Follow the README files and documentation provided within each section to unders
 
 File Structure
 This repository is organized as follows:
-
-Copy code
 COBOL-for-zOS/
 ├── sample-programs/
 │   ├── program-1/
