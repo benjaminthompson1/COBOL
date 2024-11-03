@@ -7,7 +7,7 @@ Enterprise COBOL codebase for z/OS with Git integration and DBB support.
 COBOL-for-zOS/
 ├── COPYLIB/        # Standardized copybooks
 ├── SOURCE/         # COBOL programs
-├── Z-GIT/          # Z-Git dataintegration & DB2 archive
+├── Z-GIT/          # Z-Git directory
 ├── application-conf/    # DBB configuration
 └── zGIT-DS-Attributes  # Dataset attributes
 ```
@@ -27,9 +27,7 @@ COBOL-for-zOS/
 * Git for z/OS
 * DBB toolkit
 
-## 🤝 Contributing
-
-Submit pull requests following standard Git workflow. Refer to directory-specific documentation for detailed guidelines.
-
----
-*Maintained by the Mainframe Team*
+## Clone the repository
+```
+git clone https://github.com/yourusername/COBOL-for-zOS.git
+```
