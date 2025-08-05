@@ -10,7 +10,7 @@
             "name": "Z Open Debug: Connect to a parked debug session",
             "connection": {
                 "type": "zowe",
-                "name": ""
+                "name": "zOpenDebug"
             }
         },
         {
@@ -19,7 +19,7 @@
             "name": "Z Open Debug: Connect to a parked debug session",
             "connection": {
                 "type": "zowe",
-                "name": ""
+                "name": "zOpenDebug"
             },
             "applicationLaunch": {
                 "commandLine": ""
@@ -31,7 +31,7 @@
             "name": "Z Open Debug: List parked debug sessions",
             "connection": {
                 "type": "zowe",
-                "name": ""
+                "name": "zOpenDebug"
             }
         }
     ]
