@@ -13,31 +13,31 @@
        DATA DIVISION.
        WORKING-STORAGE SECTION.
 
-       *------------------------------------------------*
-       *  Db2 SQL communication area                    *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Db2 SQL communication area                    *
+      *------------------------------------------------*
        EXEC SQL
             INCLUDE SQLCA
        END-EXEC.
 
-       *------------------------------------------------*
-       *  Host variables for ORG table                  *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Host variables for ORG table                  *
+      *------------------------------------------------*
        01  WS-DEPTNUMB           PIC 9(3).
        01  WS-DEPTNAME           PIC X(20).
        01  WS-MANAGER            PIC 9(3).
        01  WS-DIVISION           PIC X(15).
        01  WS-LOCATION           PIC X(20).
 
-       * Simple row counter for reporting
+      * Simple row counter for reporting
        01  WS-ROW-COUNT          PIC 9(5) VALUE ZERO.
 
-       * Work field for end-of-data flag
+      * Work field for end-of-data flag
        01  WS-END-OF-DATA        PIC X     VALUE 'N'.
 
-       *------------------------------------------------*
-       *  Cursor definition for department report       *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Cursor definition for department report       *
+      *------------------------------------------------*
        EXEC SQL
             DECLARE ORGCURSOR CURSOR FOR
                  SELECT DEPTNUMB,
@@ -57,9 +57,9 @@
            PERFORM TERMINATION
            GOBACK.
 
-       *------------------------------------------------*
-       *  Initialization: headings and open cursor      *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Initialization: headings and open cursor      *
+      *------------------------------------------------*
        INITIALIZATION.
            DISPLAY 'DEPARTMENT REPORT'.
            DISPLAY '------------------'.
@@ -74,9 +74,9 @@
               MOVE 'Y' TO WS-END-OF-DATA
            END-IF.
 
-       *------------------------------------------------*
-       *  Main processing loop                          *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Main processing loop                          *
+      *------------------------------------------------*
        PROCESS-ORG-TABLE.
            PERFORM UNTIL WS-END-OF-DATA = 'Y'
               PERFORM FETCH-ORG-ROW
@@ -85,9 +85,9 @@
               END-IF
            END-PERFORM.
 
-       *------------------------------------------------*
-       *  Fetch next row from cursor                    *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Fetch next row from cursor                    *
+      *------------------------------------------------*
        FETCH-ORG-ROW.
            EXEC SQL
                 FETCH ORGCURSOR
@@ -109,9 +109,9 @@
                  MOVE 'Y' TO WS-END-OF-DATA
            END-EVALUATE.
 
-       *------------------------------------------------*
-       *  Display a single ORG row                      *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Display a single ORG row                      *
+      *------------------------------------------------*
        DISPLAY-ORG-ROW.
            DISPLAY WS-DEPTNUMB ' '
                    WS-DEPTNAME ' '
@@ -119,9 +119,9 @@
                    WS-DIVISION ' '
                    WS-LOCATION.
 
-       *------------------------------------------------*
-       *  Termination: close cursor, summary message    *
-       *------------------------------------------------*
+      *------------------------------------------------*
+      *  Termination: close cursor, summary message    *
+      *------------------------------------------------*
        TERMINATION.
            IF WS-END-OF-DATA = 'N'
               * Still open and not ended via FETCH logic
