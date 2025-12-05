@@ -1,5 +1,14 @@
+       PROCESS TEST, SOURCE
        IDENTIFICATION DIVISION.
        PROGRAM-ID. ORGREP.
+       AUTHOR. BENJAMIN THOMPSON.
+       DATE-WRITTEN. 2025-12-05.
+       DATE-COMPILED.
+
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. Z31C.
+       OBJECT-COMPUTER. Z31C.
 
        DATA DIVISION.
        WORKING-STORAGE SECTION.
@@ -27,37 +36,39 @@
 
        PROCEDURE DIVISION.
 
-       DISPLAY 'DEPARTMENT REPORT'.
-       DISPLAY '------------------'.
+           DISPLAY 'DEPARTMENT REPORT'.
+           DISPLAY '------------------'.
 
-       EXEC SQL
-            OPEN ORGCURSOR
-       END-EXEC.
+           EXEC SQL
+                OPEN ORGCURSOR
+           END-EXEC.
 
-       PERFORM UNTIL SQLCODE NOT = 0
-            EXEC SQL
-                 FETCH ORGCURSOR
-                 INTO :WS-DEPTNUMB,
-                      :WS-DEPTNAME,
-                      :WS-MANAGER,
-                      :WS-DIVISION,
-                      :WS-LOCATION
-            END-EXEC
+           PERFORM UNTIL SQLCODE NOT = 0
+               EXEC SQL
+                    FETCH ORGCURSOR
+                         INTO :WS-DEPTNUMB,
+                              :WS-DEPTNAME,
+                              :WS-MANAGER,
+                              :WS-DIVISION,
+                              :WS-LOCATION
+               END-EXEC
 
-            IF SQLCODE = 0
-               DISPLAY WS-DEPTNUMB ' '
-                       WS-DEPTNAME ' '
-                       WS-MANAGER ' '
-                       WS-DIVISION ' '
-                       WS-LOCATION
-            END-IF
-       END-PERFORM.
+               IF SQLCODE = 0
+                  DISPLAY WS-DEPTNUMB ' '
+                          WS-DEPTNAME ' '
+                          WS-MANAGER ' '
+                          WS-DIVISION ' '
+                          WS-LOCATION
+               END-IF
+           END-PERFORM.
 
-       EXEC SQL
-            CLOSE ORGCURSOR
-       END-EXEC.
+           EXEC SQL
+                CLOSE ORGCURSOR
+           END-EXEC.
 
-       DISPLAY 'REPORT COMPLETE'.
+           DISPLAY 'REPORT COMPLETE'.
 
-       STOP RUN.
+           STOP RUN.
 
+
+    
