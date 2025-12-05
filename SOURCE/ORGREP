@@ -1,0 +1,63 @@
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. ORGREP.
+
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+
+       EXEC SQL
+            INCLUDE SQLCA
+       END-EXEC.
+
+       01  WS-DEPTNUMB      PIC 9(3).
+       01  WS-DEPTNAME      PIC X(20).
+       01  WS-MANAGER       PIC 9(3).
+       01  WS-DIVISION      PIC X(15).
+       01  WS-LOCATION      PIC X(20).
+
+       EXEC SQL
+            DECLARE ORGCURSOR CURSOR FOR
+                 SELECT DEPTNUMB,
+                        DEPTNAME,
+                        MANAGER,
+                        DIVISION,
+                        LOCATION
+                 FROM Q.ORG
+                 ORDER BY DEPTNUMB
+       END-EXEC.
+
+       PROCEDURE DIVISION.
+
+       DISPLAY 'DEPARTMENT REPORT'.
+       DISPLAY '------------------'.
+
+       EXEC SQL
+            OPEN ORGCURSOR
+       END-EXEC.
+
+       PERFORM UNTIL SQLCODE NOT = 0
+            EXEC SQL
+                 FETCH ORGCURSOR
+                 INTO :WS-DEPTNUMB,
+                      :WS-DEPTNAME,
+                      :WS-MANAGER,
+                      :WS-DIVISION,
+                      :WS-LOCATION
+            END-EXEC
+
+            IF SQLCODE = 0
+               DISPLAY WS-DEPTNUMB ' '
+                       WS-DEPTNAME ' '
+                       WS-MANAGER ' '
+                       WS-DIVISION ' '
+                       WS-LOCATION
+            END-IF
+       END-PERFORM.
+
+       EXEC SQL
+            CLOSE ORGCURSOR
+       END-EXEC.
+
+       DISPLAY 'REPORT COMPLETE'.
+
+       STOP RUN.
+
