@@ -90,12 +90,12 @@
       *------------------------------------------------*
        FETCH-ORG-ROW.
            EXEC SQL
-                FETCH ORGCURSOR
-                  INTO :WS-DEPTNUMB,
-                       :WS-DEPTNAME,
-                       :WS-MANAGER,
-                       :WS-DIVISION,
-                       :WS-LOCATION
+              FETCH ORGCURSOR
+                 INTO :WS-DEPTNUMB,
+                      :WS-DEPTNAME,
+                      :WS-MANAGER,
+                      :WS-DIVISION,
+                      :WS-LOCATION
            END-EXEC
 
            EVALUATE TRUE
