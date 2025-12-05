@@ -21,19 +21,26 @@
            END-EXEC.
 
       *------------------------------------------------*
-      *  Host variables for ORG table                  *
-      *------------------------------------------------*
-       01  WS-DEPTNUMB           PIC 9(2).
-       01  WS-DEPTNAME           PIC X(14).
-       01  WS-MANAGER            PIC 9(2).
-       01  WS-DIVISION           PIC X(10).
-       01  WS-LOCATION           PIC X(13).
+      *  DCLGEN for ORG table                          *
+      *------------------------------------------------*      
+       01 DCLORG.
+         10 WS-DEPTNUMB         PIC S9(4) COMP-5.
+         10 WS-DEPTNAME.
+           49 WS-DEPTNAME-LEN   PIC S9(4) COMP-5.
+           49 WS-DEPTNAME-TEXT  PIC X(14).
+         10 WS-MANAGER          PIC S9(4) COMP-5.
+         10 WS-DIVISION.
+            49 WS-DIVISION-LEN  PIC S9(4) COMP-5.
+            49 WS-DIVISION-TEXT PIC X(10).
+         10 WS-LOCATION.
+            49 WS-LOCATION-LEN  PIC S9(4) COMP-5.
+            49 WS-LOCATION-TEXT PIC X(13).
 
       * Simple row counter for reporting
-       01  WS-ROW-COUNT          PIC 9(5) VALUE ZERO.
+       01  WS-ROW-COUNT         PIC 9(5) VALUE ZERO.
 
       * Work field for end-of-data flag
-       01  WS-END-OF-DATA        PIC X     VALUE 'N'.
+       01  WS-END-OF-DATA       PIC X     VALUE 'N'.
 
       *------------------------------------------------*
       *  Cursor definition for department report       *
@@ -65,7 +72,7 @@
            DISPLAY '------------------'.
 
            EXEC SQL
-                OPEN ORGCURSOR
+              OPEN ORGCURSOR
            END-EXEC
 
            IF SQLCODE NOT = 0
@@ -123,13 +130,8 @@
       *  Termination: close cursor, summary message    *
       *------------------------------------------------*
        TERMINATION.
-           IF WS-END-OF-DATA = 'N'
-              * Still open and not ended via FETCH logic
-              CONTINUE
-           END-IF
-
            EXEC SQL
-                CLOSE ORGCURSOR
+              CLOSE ORGCURSOR
            END-EXEC
 
            IF SQLCODE NOT = 0
