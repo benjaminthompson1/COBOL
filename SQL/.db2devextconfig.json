@@ -1,0 +1,38 @@
+{
+    "TEST.sql": {
+        "execute": {
+            "connectionOptions": "UseNewConnection",
+            "onSuccessOptions": "CommitOnEachStmt",
+            "onErrorOptions": "OnErrContinue",
+            "terminator": ";",
+            "currentSchema": "IBMUSER",
+            "currentPath": "",
+            "useUpperCaseOption": true
+        },
+        "tuning": {
+            "general": {
+                "sqlid": "TMSREPO",
+                "schema": "IBMUSER",
+                "currentPath": "",
+                "reExplain": "YES",
+                "queryNumber": "",
+                "currentDegree": "ANY",
+                "currentRefreshAge": "0",
+                "currentMaintainedTableTypes": "SYSTEM",
+                "currentQueryAcceleration": "NONE",
+                "optimizationHint": "",
+                "currentGetAccelArchive": "NO",
+                "getArchive": "N",
+                "currentTemporalBusinessTime": "",
+                "currentTemporalSystemTime": "",
+                "returnAllColumnStats": "NO",
+                "returnVirtualIndexes": "NO",
+                "jobId": ""
+            },
+            "statsAdvisor": {
+                "executeImmediately": "NO",
+                "setProfile": "NO"
+            }
+        }
+    }
+}
