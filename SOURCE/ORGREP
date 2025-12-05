@@ -1,143 +1,143 @@
-       PROCESS TEST, SOURCE, SQL
-       IDENTIFICATION DIVISION.
-       PROGRAM-ID. ORGREP.
-       AUTHOR. BENJAMIN THOMPSON.
-       DATE-WRITTEN. 2025-12-05.
-       DATE-COMPILED.
-
-       ENVIRONMENT DIVISION.
-       CONFIGURATION SECTION.
-       SOURCE-COMPUTER. Z31C.
-       OBJECT-COMPUTER. Z31C.
-
-       DATA DIVISION.
-       WORKING-STORAGE SECTION.
-
-      *------------------------------------------------*
-      *  Db2 SQL communication area                    *
-      *------------------------------------------------*
-           EXEC SQL
-              INCLUDE SQLCA
-           END-EXEC.
-
-      *------------------------------------------------*
-      *  DCLGEN for ORG table                          *
-      *------------------------------------------------*      
-       01 DCLORG.
-         10 WS-DEPTNUMB         PIC S9(4) COMP-5.
-         10 WS-DEPTNAME.
-           49 WS-DEPTNAME-LEN   PIC S9(4) COMP-5.
-           49 WS-DEPTNAME-TEXT  PIC X(14).
-         10 WS-MANAGER          PIC S9(4) COMP-5.
-         10 WS-DIVISION.
-            49 WS-DIVISION-LEN  PIC S9(4) COMP-5.
-            49 WS-DIVISION-TEXT PIC X(10).
-         10 WS-LOCATION.
-            49 WS-LOCATION-LEN  PIC S9(4) COMP-5.
-            49 WS-LOCATION-TEXT PIC X(13).
-
-      * Simple row counter for reporting
-       01  WS-ROW-COUNT         PIC 9(5) VALUE ZERO.
-
-      * Work field for end-of-data flag
-       01  WS-END-OF-DATA       PIC X     VALUE 'N'.
-
-      *------------------------------------------------*
-      *  Cursor definition for department report       *
-      *------------------------------------------------*
-           EXEC SQL
-              DECLARE ORGCURSOR CURSOR FOR
-                 SELECT DEPTNUMB,
-                        DEPTNAME,
-                        MANAGER,
-                        DIVISION,
-                        LOCATION
-                 FROM Q.ORG
-                 ORDER BY DEPTNUMB
-           END-EXEC.
-
-       PROCEDURE DIVISION.
-
-       MAIN-SECTION.
-           PERFORM INITIALIZATION
-           PERFORM PROCESS-ORG-TABLE
-           PERFORM TERMINATION
-           GOBACK.
-
-      *------------------------------------------------*
-      *  Initialization: headings and open cursor      *
-      *------------------------------------------------*
-       INITIALIZATION.
-           DISPLAY 'DEPARTMENT REPORT'.
-           DISPLAY '------------------'.
-
-           EXEC SQL
-              OPEN ORGCURSOR
-           END-EXEC
-
-           IF SQLCODE NOT = 0
-              DISPLAY 'ERROR OPENING CURSOR, SQLCODE = '
-                      SQLCODE
-              MOVE 'Y' TO WS-END-OF-DATA
-           END-IF.
-
-      *------------------------------------------------*
-      *  Main processing loop                          *
-      *------------------------------------------------*
-       PROCESS-ORG-TABLE.
-           PERFORM UNTIL WS-END-OF-DATA = 'Y'
-              PERFORM FETCH-ORG-ROW
-              IF WS-END-OF-DATA NOT = 'Y'
-                 PERFORM DISPLAY-ORG-ROW
-              END-IF
-           END-PERFORM.
-
-      *------------------------------------------------*
-      *  Fetch next row from cursor                    *
-      *------------------------------------------------*
-       FETCH-ORG-ROW.
-           EXEC SQL
-              FETCH ORGCURSOR
-                 INTO :WS-DEPTNUMB,
-                      :WS-DEPTNAME,
-                      :WS-MANAGER,
-                      :WS-DIVISION,
-                      :WS-LOCATION
-           END-EXEC
-
-           EVALUATE TRUE
-              WHEN SQLCODE = 0
-                 ADD 1 TO WS-ROW-COUNT
-              WHEN SQLCODE = 100
-                 MOVE 'Y' TO WS-END-OF-DATA
-              WHEN OTHER
-                 DISPLAY 'SQL ERROR ON FETCH, SQLCODE = '
-                         SQLCODE
-                 MOVE 'Y' TO WS-END-OF-DATA
-           END-EVALUATE.
-
-      *------------------------------------------------*
-      *  Display a single ORG row                      *
-      *------------------------------------------------*
-       DISPLAY-ORG-ROW.
-           DISPLAY WS-DEPTNUMB ' '
-                   WS-DEPTNAME ' '
-                   WS-MANAGER  ' '
-                   WS-DIVISION ' '
-                   WS-LOCATION.
-
-      *------------------------------------------------*
-      *  Termination: close cursor, summary message    *
-      *------------------------------------------------*
-       TERMINATION.
-           EXEC SQL
-              CLOSE ORGCURSOR
-           END-EXEC
-
-           IF SQLCODE NOT = 0
-              DISPLAY 'ERROR CLOSING CURSOR, SQLCODE = '
-                      SQLCODE
-           END-IF
-
-           DISPLAY 'REPORT COMPLETE, ROWS READ = '
-                   WS-ROW-COUNT.
+       PROCESS TEST, SOURCE, SQL                                                
+       IDENTIFICATION DIVISION.                                                 
+       PROGRAM-ID. ORGREP.                                                      
+       AUTHOR. BENJAMIN THOMPSON.                                               
+       DATE-WRITTEN. 2025-12-05.                                                
+       DATE-COMPILED.                                                           
+                                                                                
+       ENVIRONMENT DIVISION.                                                    
+       CONFIGURATION SECTION.                                                   
+       SOURCE-COMPUTER. Z31C.                                                   
+       OBJECT-COMPUTER. Z31C.                                                   
+                                                                                
+       DATA DIVISION.                                                           
+       WORKING-STORAGE SECTION.                                                 
+                                                                                
+      *------------------------------------------------*                        
+      *  Db2 SQL communication area                    *                        
+      *------------------------------------------------*                        
+           EXEC SQL                                                             
+              INCLUDE SQLCA                                                     
+           END-EXEC.                                                            
+                                                                                
+      *------------------------------------------------*                        
+      *  DCLGEN for ORG table                          *                        
+      *------------------------------------------------*                        
+       01 DCLORG.                                                               
+         10 WS-DEPTNUMB         PIC S9(4) COMP-5.                               
+         10 WS-DEPTNAME.                                                        
+           49 WS-DEPTNAME-LEN   PIC S9(4) COMP-5.                               
+           49 WS-DEPTNAME-TEXT  PIC X(14).                                      
+         10 WS-MANAGER          PIC S9(4) COMP-5.                               
+         10 WS-DIVISION.                                                        
+            49 WS-DIVISION-LEN  PIC S9(4) COMP-5.                               
+            49 WS-DIVISION-TEXT PIC X(10).                                      
+         10 WS-LOCATION.                                                        
+            49 WS-LOCATION-LEN  PIC S9(4) COMP-5.                               
+            49 WS-LOCATION-TEXT PIC X(13).                                      
+                                                                                
+      * Simple row counter for reporting                                        
+       01  WS-ROW-COUNT         PIC 9(5) VALUE ZERO.                            
+                                                                                
+      * Work field for end-of-data flag                                         
+       01  WS-END-OF-DATA       PIC X     VALUE 'N'.                            
+                                                                                
+      *------------------------------------------------*                        
+      *  Cursor definition for department report       *                        
+      *------------------------------------------------*                        
+           EXEC SQL                                                             
+              DECLARE ORGCURSOR CURSOR FOR                                      
+                 SELECT DEPTNUMB,                                               
+                        DEPTNAME,                                               
+                        MANAGER,                                                
+                        DIVISION,                                               
+                        LOCATION                                                
+                 FROM Q.ORG                                                     
+                 ORDER BY DEPTNUMB                                              
+           END-EXEC.                                                            
+                                                                                
+       PROCEDURE DIVISION.                                                      
+                                                                                
+       MAIN-SECTION.                                                            
+           PERFORM INITIALIZATION                                               
+           PERFORM PROCESS-ORG-TABLE                                            
+           PERFORM TERMINATION                                                  
+           GOBACK.                                                              
+                                                                                
+      *------------------------------------------------*                        
+      *  Initialization: headings and open cursor      *                        
+      *------------------------------------------------*                        
+       INITIALIZATION.                                                          
+           DISPLAY 'DEPARTMENT REPORT'.                                         
+           DISPLAY '------------------'.                                        
+                                                                                
+           EXEC SQL                                                             
+              OPEN ORGCURSOR                                                    
+           END-EXEC                                                             
+                                                                                
+           IF SQLCODE NOT = 0                                                   
+              DISPLAY 'ERROR OPENING CURSOR, SQLCODE = '                        
+                      SQLCODE                                                   
+              MOVE 'Y' TO WS-END-OF-DATA                                        
+           END-IF.                                                              
+                                                                                
+      *------------------------------------------------*                        
+      *  Main processing loop                          *                        
+      *------------------------------------------------*                        
+       PROCESS-ORG-TABLE.                                                       
+           PERFORM UNTIL WS-END-OF-DATA = 'Y'                                   
+              PERFORM FETCH-ORG-ROW                                             
+              IF WS-END-OF-DATA NOT = 'Y'                                       
+                 PERFORM DISPLAY-ORG-ROW                                        
+              END-IF                                                            
+           END-PERFORM.                                                         
+                                                                                
+      *------------------------------------------------*                        
+      *  Fetch next row from cursor                    *                        
+      *------------------------------------------------*                        
+       FETCH-ORG-ROW.                                                           
+           EXEC SQL                                                             
+              FETCH ORGCURSOR                                                   
+                 INTO :WS-DEPTNUMB,                                             
+                      :WS-DEPTNAME,                                             
+                      :WS-MANAGER,                                              
+                      :WS-DIVISION,                                             
+                      :WS-LOCATION                                              
+           END-EXEC                                                             
+                                                                                
+           EVALUATE TRUE                                                        
+              WHEN SQLCODE = 0                                                  
+                 ADD 1 TO WS-ROW-COUNT                                          
+              WHEN SQLCODE = 100                                                
+                 MOVE 'Y' TO WS-END-OF-DATA                                     
+              WHEN OTHER                                                        
+                 DISPLAY 'SQL ERROR ON FETCH, SQLCODE = '                       
+                         SQLCODE                                                
+                 MOVE 'Y' TO WS-END-OF-DATA                                     
+           END-EVALUATE.                                                        
+                                                                                
+      *------------------------------------------------*                        
+      *  Display a single ORG row                      *                        
+      *------------------------------------------------*                        
+       DISPLAY-ORG-ROW.                                                         
+           DISPLAY WS-DEPTNUMB ' '                                              
+                   WS-DEPTNAME ' '                                              
+                   WS-MANAGER  ' '                                              
+                   WS-DIVISION ' '                                              
+                   WS-LOCATION.                                                 
+                                                                                
+      *------------------------------------------------*                        
+      *  Termination: close cursor, summary message    *                        
+      *------------------------------------------------*                        
+       TERMINATION.                                                             
+           EXEC SQL                                                             
+              CLOSE ORGCURSOR                                                   
+           END-EXEC                                                             
+                                                                                
+           IF SQLCODE NOT = 0                                                   
+              DISPLAY 'ERROR CLOSING CURSOR, SQLCODE = '                        
+                      SQLCODE                                                   
+           END-IF                                                               
+                                                                                
+           DISPLAY 'REPORT COMPLETE, ROWS READ = '                              
+                   WS-ROW-COUNT.                                                
