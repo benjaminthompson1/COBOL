@@ -23,11 +23,11 @@
       *------------------------------------------------*
       *  Host variables for ORG table                  *
       *------------------------------------------------*
-       01  WS-DEPTNUMB           PIC 9(3).
-       01  WS-DEPTNAME           PIC X(20).
-       01  WS-MANAGER            PIC 9(3).
-       01  WS-DIVISION           PIC X(15).
-       01  WS-LOCATION           PIC X(20).
+       01  WS-DEPTNUMB           PIC 9(2).
+       01  WS-DEPTNAME           PIC X(14).
+       01  WS-MANAGER            PIC 9(2).
+       01  WS-DIVISION           PIC X(10).
+       01  WS-LOCATION           PIC X(13).
 
       * Simple row counter for reporting
        01  WS-ROW-COUNT          PIC 9(5) VALUE ZERO.
