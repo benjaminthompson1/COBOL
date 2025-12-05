@@ -16,9 +16,9 @@
       *------------------------------------------------*
       *  Db2 SQL communication area                    *
       *------------------------------------------------*
-       EXEC SQL
-            INCLUDE SQLCA
-       END-EXEC.
+           EXEC SQL
+              INCLUDE SQLCA
+           END-EXEC.
 
       *------------------------------------------------*
       *  Host variables for ORG table                  *
@@ -38,16 +38,16 @@
       *------------------------------------------------*
       *  Cursor definition for department report       *
       *------------------------------------------------*
-       EXEC SQL
-            DECLARE ORGCURSOR CURSOR FOR
+           EXEC SQL
+              DECLARE ORGCURSOR CURSOR FOR
                  SELECT DEPTNUMB,
                         DEPTNAME,
                         MANAGER,
                         DIVISION,
                         LOCATION
-                   FROM Q.ORG
-                  ORDER BY DEPTNUMB
-       END-EXEC.
+                 FROM Q.ORG
+                 ORDER BY DEPTNUMB
+           END-EXEC.
 
        PROCEDURE DIVISION.
 
