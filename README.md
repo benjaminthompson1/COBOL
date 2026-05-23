@@ -8,6 +8,7 @@ Enterprise COBOL codebase for IBM z/OS demonstrating a range of techniques inclu
 ├── SOURCE/           - COBOL program source files
 ├── COPYLIB/          - Shared copybooks (data structures, linkage sections)
 ├── JAVA/             - Java source for COBOL-Java interoperability demo
+├── JCL/              - Compile and execution JCL for project programs
 ├── SQL/              - SQL DDL and standalone scripts
 ├── application-conf/ - DBB build and compiler configuration
 ├── Z-GIT/            - zGit metadata (#MAKE, #IGNORE)

@@ -876,48 +876,73 @@ ls -al classes/com/ibm/demo/
 
 ---
 
-### Step 4 — DBB Build Configuration
+### Step 4 — Compile and Bind JCL: IUCBLCL
 
-The `THREAD` compiler option must be added for `CBLCLJVA`.  In `application-conf/file.properties`, add a file-level override (the key format is `<member>.propertyName`):
+This project does not use a DBB pipeline.  Compilation uses the existing `IGYQCB` proc via a dedicated JCL member stored in `JCL/IUCBLCL` in this repo (upload to `IBMUSER.CNTL(IUCBLCL)` before submitting).
 
-```properties
-# CBLCLJVA requires THREAD for OO INVOKE / JVM support
-CBLCLJVA.cobol_compileParms=LIB,TEST,THREAD
+```jcl
+//IUCBLCL JOB (FB3),'CBLCLJVA COMP-BIND',CLASS=A,MSGCLASS=H,
+//        NOTIFY=&SYSUID,REGION=0M,TIME=1440
+//*       TYPRUN=HOLD
+//*--------------------------------------------------------------------*
+//* JOB:   IUCBLCL
+//* DESC:  Compile and bind CBLCLJVA - COBOL calling Java via OO INVOKE
+//* AUTH:  Ben               DATE: 2026-05-24
+//*
+//* The THREAD compiler option is specified via the PROCESS card in
+//* CBLCLJVA source - no PARM override required here.  IGYQCB's
+//* bind step applies RENT by default, which is required for all
+//* programs compiled with THREAD.
+//*
+//* Prerequisites:
+//*   IBMUSER.GIT.COBOL.SOURCE(CBLCLJVA) - source loaded from git
+//*   IBMUSER.GIT.COBOL.OBJECT           - object deck PDS (pre-exists)
+//*   IBMUSER.GIT.COBOL.LOAD             - load library   (pre-exists)
+//*--------------------------------------------------------------------*
+//COBCB1 EXEC IGYQCB,
+//            LNGPRFX=IGY650,
+//            LIBPRF1=CEE,
+//            GOPGM=CBLCLJVA
+//COBOL.SYSLIB DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.COPYLIB
+//COBOL.SYSIN  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.SOURCE(CBLCLJVA)
+//COBOL.SYSLIN DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.OBJECT(CBLCLJVA)
+//BIND.SYSLIB  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.LOAD
+//BIND.SYSLIN  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.OBJECT(CBLCLJVA)
+//BIND.SYSLMOD DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.LOAD(CBLCLJVA)
+//*--------------------------------------------------------------------*
+//* End of Job
+//*--------------------------------------------------------------------*
 ```
 
-`THREAD` enables:
-- Language Environment thread-safety required by the JVM
-- OO COBOL `INVOKE` and `REPOSITORY` processing
-- JVM initialisation on the first `INVOKE` call
+**Why no PARM change is needed for `THREAD`:**  
+`CBLCLJVA` opens with `PROCESS THREAD,TEST,SOURCE`.  The compiler reads the `PROCESS` card before the JCL `PARM=`, so `THREAD` is picked up automatically — the proc runs unmodified.
 
-The linker already uses `RENT` (`cobol_linkEditParms=XREF,LIST,RENT`), which is also required.
-
-> **Note:** The `dbb.scriptMapping` in `file.properties` currently targets `cics-genapp/...` paths.  
-> On z/OS, ensure the mapping includes the `SOURCE/` directory or adjust per your site's DBB workspace layout.
+**Why `RENT` is already covered:**  
+`IGYQCB`'s bind step includes `RENT` in its default parms, the same as every other program compiled with this proc.  No override required.
 
 ---
 
-### Step 5 — Execution JCL
+### Step 5 — Execution JCL: CBLCLJVA
 
-Store as `IBMUSER.CNTL(CBLCLJVA)`:
+Stored as `JCL/CBLCLJVA` in this repo (upload to `IBMUSER.CNTL(CBLCLJVA)` before submitting):
 
 ```jcl
-//CBLCLJVA JOB (FB3),'COBOL-Java Demo',CLASS=A,MSGCLASS=H,
+//CBLCLJVA JOB (FB3),'COBOL-JAVA DEMO',CLASS=A,MSGCLASS=H,
 //         NOTIFY=&SYSUID,REGION=0M,TIME=1440
-//*
-//* Run COBOL program CBLCLJVA which calls Java via OO INVOKE.
-//* Prerequisites:
-//*   CobolHelper.class at /u/ibmuser/cobldemo/classes/com/ibm/demo/
-//*   CBLCLJVA load module in IBMUSER.LOAD
-//*
+//*        TYPRUN=HOLD
+//*--------------------------------------------------------------------*
+//* JOB:   CBLCLJVA
+//* DESC:  Execute CBLCLJVA - COBOL calling Java via OO INVOKE
+//* AUTH:  Ben               DATE: 2026-05-24
+//*--------------------------------------------------------------------*
 //STEP1    EXEC PGM=CBLCLJVA
-//STEPLIB  DD DSN=IBMUSER.LOAD,DISP=SHR
-//         DD DSN=CEE.SCEERUN,DISP=SHR
+//STEPLIB  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.LOAD
+//         DD DISP=SHR,DSN=CEE.SCEERUN
 //*
-//* CEEOPTS ENVAR passes environment variables to Language Environment.
-//* LE uses JAVA_HOME to locate the JVM shared library and initialise
-//* the JVM on the first INVOKE call.  CLASSPATH tells the JVM where
-//* to find CobolHelper.class.
+//* CEEOPTS passes environment variables to Language Environment.
+//* LE uses JAVA_HOME to locate and initialise the JVM on the first
+//* INVOKE call.  CLASSPATH must be the root above com/ibm/demo/ so
+//* that the JVM resolves com.ibm.demo.CobolHelper correctly.
 //*
 //CEEOPTS  DD *
 ENVAR("JAVA_HOME=/usr/lpp/java/J21.0_64",
@@ -928,6 +953,9 @@ ENVAR("JAVA_HOME=/usr/lpp/java/J21.0_64",
 //STDOUT   DD SYSOUT=*
 //STDERR   DD SYSOUT=*
 //CEEDUMP  DD SYSOUT=*
+//*--------------------------------------------------------------------*
+//* End of Job
+//*--------------------------------------------------------------------*
 ```
 
 **Why `CEEOPTS ENVAR` not `JAVAENV` DD:**  
@@ -972,11 +1000,11 @@ COBOL `DISPLAY` output goes to SYSOUT.
 
 | Symptom | Likely Cause | Resolution |
 |---|---|---|
-| `CEE3501S IGZCJAVA not found` | `THREAD` option missing from compile | Add `THREAD` to `CBLCLJVA.cobol_compileParms` and recompile |
+| `CEE3501S IGZCJAVA not found` | `THREAD` option missing from compile | Confirm `PROCESS THREAD` is first line of source; recompile |
 | `CEE0199W JVM initialisation failed` | `JAVA_HOME` not set or wrong path | Verify `CEEOPTS ENVAR("JAVA_HOME=/usr/lpp/java/J21.0_64")` |
 | `ClassNotFoundException: com/ibm/demo/CobolHelper` | Wrong or missing CLASSPATH | Confirm `/u/ibmuser/cobldemo/classes/com/ibm/demo/CobolHelper.class` exists |
 | `NULL` returned after `INVOKE "new"` | Java exception in constructor | Check STDERR DD for Java stack trace |
-| `S0C4` protection exception | Missing `RENT` on link-edit | Verify `cobol_linkEditParms` includes `RENT` |
+| `S0C4` protection exception | Missing `RENT` on link-edit | Verify IGYQCB bind step PARM includes `RENT`; rebind |
 | `S0C7` data exception on DISPLAY | COMP-5 display picture mismatch | Ensure display PIC matches the COMP-5 field size |
 | JVM starts but `fibonacci` returns wrong value | Classpath loaded wrong class | Check for stale `.class` files; recompile Java |
 
@@ -985,32 +1013,35 @@ COBOL `DISPLAY` output goes to SYSOUT.
 ## 15. Build Sequence Checklist
 
 ```
-USS Setup
-─────────
-[ ] mkdir -p /u/ibmuser/cobldemo/classes
-[ ] Create /u/ibmuser/cobldemo/com/ibm/demo/CobolHelper.java
-[ ] javac -d classes com/ibm/demo/CobolHelper.java
-[ ] ls classes/com/ibm/demo/CobolHelper.class  (verify)
+USS Setup  (Section 1 — COMPLETE)
+──────────────────────────────────
+[x] mkdir -p /u/ibmuser/cobldemo/classes
+[x] Copy CobolHelper.java to USS
+[x] cd /u/ibmuser/cobldemo/classes/com/ibm/demo && javac CobolHelper.java
+[x] ls CobolHelper.class  (verified 2106 bytes)
 
-Repo / Source
-─────────────
-[ ] Create SOURCE/CBLCLJVA  (COBOL source above)
-[ ] Add CBLCLJVA.cobol_compileParms=LIB,TEST,THREAD  to file.properties
+Repo / Source  (Section 2 — COMPLETE)
+──────────────────────────────────────
+[x] Create SOURCE/CBLCLJVA  (COBOL source with PROCESS THREAD)
+[x] Create JCL/IUCBLCL  (compile and bind JCL)
+[x] Create JCL/CBLCLJVA  (execution JCL)
 
-DBB Build (on z/OS)
-────────────────────
-[ ] Run DBB build for CBLCLJVA
-[ ] Confirm RC=0 compile (THREAD option accepted)
-[ ] Confirm RC=0 link-edit (RENT in effect)
-[ ] Verify IBMUSER.LOAD(CBLCLJVA) exists
+Compile and Bind  (Section 3 — NEXT)
+─────────────────────────────────────
+[ ] Upload SOURCE/CBLCLJVA  → IBMUSER.GIT.COBOL.SOURCE(CBLCLJVA)
+[ ] Upload JCL/IUCBLCL     → IBMUSER.CNTL(IUCBLCL)
+[ ] Submit IBMUSER.CNTL(IUCBLCL)
+[ ] Confirm COBOL step RC=0 (THREAD accepted from PROCESS card)
+[ ] Confirm BIND  step RC=0 (RENT applied by IGYQCB default)
+[ ] Verify IBMUSER.GIT.COBOL.LOAD(CBLCLJVA) exists
 
-Execution
-─────────
-[ ] Upload / copy JCL IBMUSER.CNTL(CBLCLJVA)
-[ ] Submit job
-[ ] Review SYSOUT: COBOL DISPLAY lines
-[ ] Review STDOUT: Java System.out lines
-[ ] Confirm return code = 0
+Execution  (Section 4)
+───────────────────────
+[ ] Upload JCL/CBLCLJVA → IBMUSER.CNTL(CBLCLJVA)
+[ ] Submit IBMUSER.CNTL(CBLCLJVA)
+[ ] SYSOUT: review COBOL DISPLAY output
+[ ] STDOUT: review Java System.out lines (CobolHelper.*)
+[ ] Confirm job return code = 0
 ```
 
 ---
