@@ -1,0 +1,7 @@
+       01  CATALOG-FILE.                                                        
+           05  WS-ITEM-REF-NUM     PIC 9(4).                                    
+           05  WS-DESCRIPTION      PIC X(40).                                   
+           05  WS-DEPARTMENT       PIC 9(3).                                    
+           05  WS-COST             PIC ZZZ.99.                                  
+           05  WS-IN-STOCK         PIC 9(4).                                    
+           05  WS-ON-ORDER         PIC 9(3).                                    

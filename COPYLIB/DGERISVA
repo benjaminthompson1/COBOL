@@ -1,0 +1,28 @@
+      ******************************************************************        
+      * DCLGEN TABLE(ERIS.VACCINATION)                                 *        
+      *        LIBRARY(IBMUSER.COBOL.COPYLIB(DGERISVA))                *        
+      *        LANGUAGE(COBOL)                                         *        
+      *        QUOTE                                                   *        
+      * ... IS THE DCLGEN COMMAND THAT MADE THE FOLLOWING STATEMENTS   *        
+      ******************************************************************        
+           EXEC SQL DECLARE ERIS.VACCINATION TABLE                              
+           ( PERSON_ID                      INTEGER NOT NULL,                   
+             PROVIDER_ID                    INTEGER NOT NULL,                   
+             JAB_1_TYPE                     CHAR(1),                            
+             JAB_1_DATE                     DATE,                               
+             JAB_2_TYPE                     CHAR(1),                            
+             JAB_2_DATE                     DATE                                
+           ) END-EXEC.                                                          
+      ******************************************************************        
+      * COBOL DECLARATION FOR TABLE ERIS.VACCINATION                   *        
+      ******************************************************************        
+       01  DCLVACCINATION.                                                      
+           10 PERSON-ID            PIC S9(9) USAGE COMP.                        
+           10 PROVIDER-ID          PIC S9(9) USAGE COMP.                        
+           10 JAB-1-TYPE           PIC X(1).                                    
+           10 JAB-1-DATE           PIC X(10).                                   
+           10 JAB-2-TYPE           PIC X(1).                                    
+           10 JAB-2-DATE           PIC X(10).                                   
+      ******************************************************************        
+      * THE NUMBER OF COLUMNS DESCRIBED BY THIS DECLARATION IS 6       *        
+      ******************************************************************        

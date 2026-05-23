@@ -1,0 +1,272 @@
+       IDENTIFICATION DIVISION.                                                 
+       PROGRAM-ID. DB2ARCH.                                                     
+       AUTHOR. BENJAMIN THOMPSON.                                               
+       DATE-WRITTEN. 2024-07-08.                                                
+       DATE-COMPILED.                                                           
+                                                                                
+      *                                                                         
+      * This program performs several functiuons on a Db2 Archive table         
+      *                                                                         
+       ENVIRONMENT DIVISION.                                                    
+       CONFIGURATION SECTION.                                                   
+       SOURCE-COMPUTER. Z32A.                                                   
+       OBJECT-COMPUTER. Z32A.                                                   
+       INPUT-OUTPUT SECTION.                                                    
+       FILE-CONTROL.                                                            
+           SELECT IMMUN-IN ASSIGN TO IMMUN                                      
+             ORGANIZATION IS SEQUENTIAL.                                        
+                                                                                
+       DATA DIVISION.                                                           
+       FILE SECTION.                                                            
+       FD  IMMUN-IN                                                             
+           RECORDING MODE IS F                                                  
+           LABEL RECORDS ARE STANDARD                                           
+           RECORD CONTAINS 80 CHARACTERS                                        
+           BLOCK CONTAINS 0 RECORDS                                             
+           DATA RECORD IS IMMUNISATION-REC.                                     
+       01  IMMUNISATION-REC              PIC X(80).                             
+                                                                                
+       WORKING-STORAGE SECTION.                                                 
+      * End of File switch                                                      
+       77  IMMUNISATION-EOF              PIC X(01) VALUE SPACE.                 
+           88 END-OF-FILE                VALUE 'Y'.                             
+      * Db2 return code                                                         
+       77  SQLCODE-OUT                   PIC S9(03) VALUE 0.                    
+      * Db2 SYSIBMADM.MOVE_TO_ARCHIVE built-in global variable                  
+       77  DB2-MOVE-TO-ARCHIVE           PIC X(01) VALUE 'N'.                   
+      * Db2 SYSIBMADM.GET_ARCHIVE built-in global variable                      
+       77  DB2-GET-ARCHIVE               PIC X(01) VALUE 'N'.                   
+                                                                                
+      * Program operation                                                       
+      * LD = LOAD                                                               
+      * DD = DELETE                                                             
+      * DA = DELETE                                                             
+      * SB = BASE ONLY                                                          
+      * SA = ARCHIVE ONLY                                                       
+      * SS = BOTH                                                               
+       01  WS-IMMUNISATION.                                                     
+           05  WS-OPERATION              PIC X(02).                             
+           05  WS-IMMUNISATION-DATA      PIC X(78).                             
+                                                                                
+       01  WS-INSERT-IMMUNISATION.                                              
+           10 WS-INSERT-PERSON-ID        PIC 9(4).                              
+           10 WS-INSERT-VACCINATION-TYPE PIC X(5).                              
+           10 WS-INSERT-VACCINATION-DATE PIC X(10).                             
+           10 FILLER                     PIC X(59).                             
+                                                                                
+       01  WS-DELETE-IMMUNISATION.                                              
+           10 WS-DELETE-PERSON-ID        PIC 9(4).                              
+           10 FILLER                     PIC X(74).                             
+                                                                                
+       01  WS-SELECT-IMMUNISATION.                                              
+           10 WS-SELECT-PERSON-ID        PIC 9(4).                              
+           10 FILLER                     PIC X(74).                             
+                                                                                
+      * IMMUNISATION DCLGEN                                                     
+           EXEC SQL                                                             
+              INCLUDE DGIMMUNI                                                  
+           END-EXEC.                                                            
+                                                                                
+      * SQL communication area (SQLCA) to check return status                   
+           EXEC SQL                                                             
+              INCLUDE SQLCA                                                     
+           END-EXEC.                                                            
+                                                                                
+       PROCEDURE DIVISION.                                                      
+           PERFORM 000-Housekeeping.                                            
+           PERFORM 100-Main UNTIL END-OF-FILE.                                  
+           PERFORM 900-Close-Files.                                             
+           GOBACK.                                                              
+                                                                                
+       000-Housekeeping.                                                        
+           INITIALIZE WS-IMMUNISATION.                                          
+           INITIALIZE WS-INSERT-IMMUNISATION.                                   
+           INITIALIZE WS-DELETE-IMMUNISATION.                                   
+           INITIALIZE WS-SELECT-IMMUNISATION.                                   
+           PERFORM 300-Open-Files.                                              
+      * Priming Read                                                            
+           PERFORM 400-Read-IN-PARM.                                            
+                                                                                
+       100-Main.                                                                
+           EVALUATE WS-OPERATION                                                
+           WHEN 'LD'                                                            
+              DISPLAY 'LOAD'                                                    
+              PERFORM 500-Immunisation-Insert                                   
+           WHEN 'DD'                                                            
+              DISPLAY 'DELETE DELETE'                                           
+              PERFORM 510-Immunisation-Delete                                   
+           WHEN 'DA'                                                            
+              DISPLAY 'DELETE ARCHIVE'                                          
+              PERFORM 510-Immunisation-Delete                                   
+           WHEN 'SB'                                                            
+              DISPLAY 'SELECT BASE ONLY'                                        
+              PERFORM 520-Immunisation-Select-Base                              
+           WHEN 'SA'                                                            
+              DISPLAY 'SELECT ARCHIVE ONLY'                                     
+              PERFORM 530-Immunisation-Select-Arch                              
+           WHEN 'SS'                                                            
+              DISPLAY 'SELECT BOTH BASE AND ARCHIVE'                            
+              PERFORM 520-Immunisation-Select-Base                              
+           WHEN OTHER                                                           
+              DISPLAY 'ERROR'                                                   
+           END-EVALUATE.                                                        
+      * Initialise DCL Immunistation                                            
+           INITIALIZE DCLIMMUNISATION.                                          
+                                                                                
+           PERFORM 400-Read-IN-PARM.                                            
+                                                                                
+       300-Open-Files.                                                          
+           OPEN INPUT IMMUN-IN.                                                 
+                                                                                
+       400-Read-IN-PARM.                                                        
+           READ IMMUN-IN INTO WS-IMMUNISATION                                   
+      * Set AT END Switch                                                       
+              AT END MOVE 'Y' TO IMMUNISATION-EOF                               
+           END-READ.                                                            
+                                                                                
+       500-Immunisation-Insert.                                                 
+           MOVE WS-IMMUNISATION-DATA       TO WS-INSERT-IMMUNISATION            
+           MOVE WS-INSERT-PERSON-ID        TO PERSON-ID                         
+           MOVE WS-INSERT-VACCINATION-TYPE TO VACCINATION-TYPE                  
+           MOVE WS-INSERT-VACCINATION-DATE TO VACCINATION-DATE                  
+      * SQL insert - one row only                                               
+           EXEC SQL                                                             
+              INSERT INTO IBMUSER.IMMUNISATION                                  
+                 (                                                              
+                  PERSON_ID,                                                    
+                  VACCINATION_TYPE,                                             
+                  VACCINATION_DATE                                              
+                 )                                                              
+              VALUES                                                            
+                 (                                                              
+                  :PERSON-ID,                                                   
+                  :VACCINATION-TYPE,                                            
+                  :VACCINATION-DATE                                             
+                 )                                                              
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+      * Commit insert                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+                   ' VACCINATION-TYPE = ' VACCINATION-TYPE                      
+                   ' VACCINATION-DATE = ' VACCINATION-DATE.                     
+                                                                                
+       510-Immunisation-Delete.                                                 
+           MOVE WS-IMMUNISATION-DATA       TO WS-DELETE-IMMUNISATION            
+           MOVE WS-DELETE-PERSON-ID        TO PERSON-ID                         
+      * Determin Delete or Archive                                              
+           IF WS-OPERATION = 'DD'                                               
+              MOVE 'N' TO DB2-MOVE-TO-ARCHIVE                                   
+           ELSE                                                                 
+              MOVE 'Y' TO DB2-MOVE-TO-ARCHIVE                                   
+           END-IF.                                                              
+      * SYSIBMADM.MOVE_TO_ARCHIVE built-in global variable                      
+           EXEC SQL                                                             
+              SET SYSIBMADM.MOVE_TO_ARCHIVE = :DB2-MOVE-TO-ARCHIVE              
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'SYSIBMADM.MOVE_TO_ARCHIVE :' DB2-MOVE-TO-ARCHIVE            
+      * Commit global variable                                                  
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+      * SQL delete - one row                                                    
+           EXEC SQL                                                             
+              DELETE FROM IBMUSER.IMMUNISATION                                  
+              WHERE PERSON_ID = :PERSON-ID                                      
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+      * Commit delete                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes.                                        
+                                                                                
+       520-Immunisation-Select-Base.                                            
+           MOVE WS-IMMUNISATION-DATA       TO WS-SELECT-IMMUNISATION            
+           MOVE WS-SELECT-PERSON-ID        TO PERSON-ID                         
+      * Determin Select Base or Base and Archive                                
+           IF WS-OPERATION = 'SB'                                               
+              MOVE 'N' TO DB2-GET-ARCHIVE                                       
+           ELSE                                                                 
+              MOVE 'Y' TO DB2-GET-ARCHIVE                                       
+           END-IF.                                                              
+      * SYSIBMADM.GET_ARCHIVE built-in global variable                          
+           EXEC SQL                                                             
+              SET SYSIBMADM.GET_ARCHIVE = :DB2-GET-ARCHIVE                      
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'SYSIBMADM.GET_ARCHIVE :' DB2-GET-ARCHIVE                    
+      * Commit global variable                                                  
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+      * SQL select - one row only                                               
+           EXEC SQL                                                             
+                SELECT * INTO :DCLIMMUNISATION                                  
+                FROM IBMUSER.IMMUNISATION                                       
+                WHERE PERSON_ID = :PERSON-ID                                    
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+      * Commit select                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+                   ' VACCINATION-TYPE = ' VACCINATION-TYPE                      
+                   ' VACCINATION-DATE = ' VACCINATION-DATE.                     
+                                                                                
+       530-Immunisation-Select-Arch.                                            
+           MOVE WS-IMMUNISATION-DATA       TO WS-SELECT-IMMUNISATION            
+           MOVE WS-SELECT-PERSON-ID        TO PERSON-ID                         
+      * SQL select - one row only                                               
+           EXEC SQL                                                             
+                SELECT * INTO :DCLIMMUNISATION                                  
+                FROM IBMUSER.IMMUNISATION_ARCHIVE                               
+                WHERE PERSON_ID = :PERSON-ID                                    
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+      * Commit select                                                           
+           EXEC SQL                                                             
+              COMMIT WORK                                                       
+           END-EXEC                                                             
+      * Check SQL returncode                                                    
+           PERFORM 800-SQL-Return-Codes                                         
+           DISPLAY 'PERSON-ID = ' PERSON-ID                                     
+                   ' VACCINATION-TYPE = ' VACCINATION-TYPE                      
+                   ' VACCINATION-DATE = ' VACCINATION-DATE.                     
+                                                                                
+       800-SQL-Return-Codes.                                                    
+           IF SQLCODE NOT EQUAL TO ZERO                                         
+              DISPLAY 'SQL ERROR '                                              
+                      ' SQLCODE : ' SQLCODE                                     
+                      ' SQLSTATE  :' SQLSTATE                                   
+                      ' PERSON-ID : ' PERSON-ID                                 
+                      ' OPERATION-TYPE : ' WS-OPERATION                         
+           END-IF.                                                              
+                                                                                
+       900-Close-Files.                                                         
+           CLOSE IMMUN-IN.                                                      
+           EXEC SQL                                                             
+             CLOSE IMMUN                                                        
+           END-EXEC.                                                            
+                                                                                
+                                                                                
+                                                                                

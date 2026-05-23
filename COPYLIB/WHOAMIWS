@@ -1,0 +1,5 @@
+       01  WHO.                                                                 
+           03  WHO-USERID    PIC X(8).                                          
+           03  WHO-JOB       PIC X(8).                                          
+           03  WHO-STEP      PIC X(8).                                          
+           03  WHO-PROGRAM   PIC X(8).                                          

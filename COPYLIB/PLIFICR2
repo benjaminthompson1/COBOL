@@ -1,0 +1,194 @@
+ /*********************************************************************/00010000
+ /*                                                                   */00020000
+ /* ICR FILE RECORD LAYOUT                                   15/12/14 */00030000
+ /*                                                                   */00040000
+ /* THIS FILE WILL HOLD DETAILS OF PC3 FORMS THAT WON'T FIT ON FICR.  */00050000
+ /*                                                                   */00060000
+ /*********************************************************************/00070000
+ DCL 1 FICR2_RECORD,                                                    00080000
+        3 FICR2_FIXED_AREA,                                             00081000
+          5 FICR2_KEY,                                                  00090000
+            7 FICR2_FORM_NUMBER               CHAR (9),                 00100000
+          5 FICR2_FLAGS,                                                00110000
+            7 FICR2_APPL_PHOTO_CHK_BOX        BIT (1),                  00120000
+            7 FICR2_RES_ADDR_CHK_BOX          BIT (1),                  00130000
+            7 FICR2_PARENT_BC_CHK_BOX         BIT (1),                  00140000
+            7 FICR2_NC_MARRIAGE               BIT (1),                  00150000
+            7 FICR2_NC_REG_RSHIP              BIT (1),                  00160000
+            7 FICR2_NC_DIVORCE                BIT (1),                  00170000
+            7 FICR2_NC_DEATH_CERT             BIT (1),                  00180000
+            7 FICR2_NC_NAME_CHANGE_CERT       BIT (1),                  00190000
+            7 FICR2_NC_REVISED_BC             BIT (1),                  00200000
+            7 FICR2_NC_OTHER                  BIT (1),                  00210000
+            7 FICR2_POI_AUS_PPT_CHK_BOX       BIT (1),                  00220000
+            7 FICR2_REF_CHK_BOX               BIT (1),                  00230000
+            7 FICR2_GENERAL_STATEMENT         BIT (1),                  00240000
+            7 FICR2_PPT_TYPE_SENIOR           BIT (1),                  00250000
+            7 FICR2_PREV_PPT_EXPIRED          BIT (1),                  00260000
+            7 FICR2_PREV_PPT_FULL             BIT (1),                  00270000
+            7 FICR2_PREV_PPT_CANCELLED        BIT (1),                  00280000
+            7 FICR2_PREV_PPT_PPTCR            BIT (1),                  00290000
+            7 FICR2_PREV_PPT_CONCURRENT       BIT (1),                  00300000
+            7 FICR2_PREV_PPT_LSD_IUSE         BIT (1),                  00310000
+            7 FICR2_PAYMENT_APPL              BIT (1),                  00320000
+            7 FICR2_PAYMENT_OPS               BIT (1),                  00330000
+            7 FICR2_PAYMENT_REPLACEMENT       BIT (1),                  00340000
+            7 FICR2_REFERAL_APPL              BIT (1),                  00350000
+            7 FICR2_PPT_SIGNATURE             BIT (1),                  00360000
+            7 FICR2_DELTA_WEB_CHECKED         BIT (1),                  00370000
+            7 FICR2_FR_CHECKED                BIT (1),                  00380000
+            7 FICR2_CHILD_APPLICATION         BIT (1),                  00390000
+            7 FICR2_PPF_CHK_BOX               BIT (1),                  00400000
+            7 FICR2_APPL_DECL_CHK_BOX         BIT (1),                  00410000
+            7 FICR2_FLAGS_REST                BIT (2),                  00420001
+          5 FICR2_FLAGS_REST2               CHAR (4),                   00421001
+                                                                        00430000
+          /* SECTION 17C OTHER PASSPORT TYPE             */             00440000
+          /* 'E' - EMERGENCY OR LVP   'R' - REPLACEMENT  */             00450000
+          /* 'I' - DOI                'C' - CONCURRENT   */             00460000
+          /* 'B' - FREQUENT           'F' - OFFICIAL     */             00470000
+          /* 'D' - DIPLOMATIC                            */             00480000
+          5 FICR2_PPT_TYPE                    CHAR (1),                 00490000
+          /* DATE THE DIGITAL CAPTURE APPLICATION WAS SUBMITTED */      00500000
+          5 FICR2_SUBMISSION_DATE             FIXED DEC (7),            00510000
+          5 FICR2_FILLER1                     CHAR (38),                00520000
+        3 FICR2_COMPRESS_AREA,                                          00530000
+          5 FICR2_PARENT_CSHIP_DETAILS,                                 00540000
+      /* RESPONSES TO WAS A PARENT OF THE APPLICANT BORN BEFORE     */  00550000
+      /* 20-08-1986                                                 */  00551000
+      /* 'Y' - YES                                                  */  00552000
+      /* 'C' - PARENT HAS AN AUSTRALIAN CITIZENSHIP CERT ISSUED     */  00553000
+      /*       BEFORE APPLICANTS BIRTH                              */  00554000
+      /* 'F' - FORM S1 CONFIRMATION OF PARENTS CITIZENSHIP PRESENTED*/  00555000
+      /*       AT INTERVIEW                                         */  00556000
+            7 FICR2_PARENT_BEFORE_AUG_1986      CHAR (1),   /* Y/C/F */ 00557000
+            7 FICR2_PARENT_BC_DOB               FIXED DEC (7),          00558000
+            7 FICR2_PARENT_BC_STATE             CHAR (3),               00559000
+            7 FICR2_PARENT_BC_REG_NUMBER        CHAR (12),              00560000
+            7 FICR2_PARENT_BC_REG_DATE          FIXED DEC (7),          00570000
+            7 FICR2_PARENT_BC_CERT_NUMBER       CHAR (12),              00580000
+            7 FICR2_PARENT_BC_ISSUE_DATE        FIXED DEC (7),          00590000
+            7 FICR2_PARENT_BC_FAMILY_NAME       CHAR (31),              00600000
+            7 FICR2_PARENT_BC_GIVEN_NAMES       CHAR (31),              00610000
+            7 FICR2_PARENT_CITZ_CERTIFICATE     CHAR (12),              00620000
+            7 FICR2_PARENT_CITZ_ACQUIRE_DATE    FIXED DEC (7),          00630000
+            7 FICR2_PARENT_CC_FAMILY_NAME       CHAR (31),              00640000
+            7 FICR2_PARENT_CC_GIVEN_NAMES       CHAR (31),              00650000
+          5 FICR2_NAME_CHANGE_DETAILS,                                  00660000
+            7 FICR2_NC_EVENT_DATE               FIXED DEC (7),          00670000
+            7 FICR2_NC_CERT_NUMBER              CHAR (12),              00680000
+            7 FICR2_NC_PREV_FAMILY_NAME         CHAR (31),              00690000
+            7 FICR2_NC_PREV_GIVEN_NAMES         CHAR (31),              00700000
+            7 FICR2_NC_SPOUSE_FAMILY_NAME       CHAR (31),              00710000
+            7 FICR2_NC_SPOUSE_GIVEN_NAMES       CHAR (31),              00720000
+          5 FICR2_PROOF_OF_ID_DETAILS,                                  00730000
+       /* POI_TYPE                                                   */ 00740000
+       /* 'P' - AUSTRALIAN PASSPORT 'I' - IDENTITY DOCS FROM SECTION */ 00750000
+       /* 'I' - IDENTITY DOCS FROM SECTIONS 11B AND 11C              */ 00750100
+            7 FICR2_POI_TYPE                    CHAR (1),     /* P, I */00750200
+       /* PRIMARY ID TYPE INDICATORS:                                */ 00750300
+       /* 'D' - DRIVING LICENCE 'A' - AUSTRALIAN PROOF OF AGE CARD   */ 00750400
+       /* 'F' - FOREIGN PASSPORT 'O' - REFER OFFICIAL COMMENTS       */ 00750500
+            7 FICR2_POI_PRIMARY_ID_TYPE         CHAR (1), /* D/A/F/O */ 00750600
+            7 FICR2_POI_FLAGS,                                          00750700
+              9 FICR2_POI_OFF_USE_1             BIT (1),                00750800
+              9 FICR2_POI_OFF_USE_2             BIT (1),                00750900
+              9 FICR2_POI_SECT_B_CHK_BOX        BIT (1),                00751000
+              9 FICR2_POI_SECT_C_CHK_BOX        BIT (1),                00752000
+              9 FICR2_POI_SPARE_FLAGS           BIT (4),                00753002
+            7 FICR2_POI_SPARE_FLAGS2            CHAR (1),               00753103
+            7 FICR2_POI_DL_FAMILY_NAME          CHAR (31),              00754000
+            7 FICR2_POI_DL_GIVEN_NAMES          CHAR (31),              00755000
+            7 FICR2_POI_DL_EXPIRY_DATE          FIXED DEC (7),          00756000
+            7 FICR2_POI_PROOF_AGE_CARD_NO       CHAR (15),              00757000
+            7 FICR2_POI_PROOF_AGE_ISSUE_STATE   CHAR (3),               00758000
+            7 FICR2_POI_FP_PPT_NUMBER           CHAR (12),              00759000
+            7 FICR2_POI_FP_PPT_COUNTRY          CHAR (30),              00760000
+            7 FICR2_POI_PRI_OFF_USE_COMMENTS    CHAR (30),              00770000
+       /* SECONDARY ID TYPE INDICATORS:                              */ 00780000
+       /* 'M' - MEDICARE CARD       'C' - CENTRELINK CARD            */ 00790000
+       /* 'V' - DEPT OF VET AFFAIRS 'I' - IMMICARD                   */ 00800000
+       /* 'B' - BANK ACCOUNT OR CREDIT CARD                          */ 00810000
+       /* 'S' - AUST STATE GOVT ISSUED LICENCE OR IDENTITY CARD      */ 00820000
+       /* 'F' - AUST FEDERAL GOVT ISSUED LICENCE OR IDENTITY CARD    */ 00830000
+       /* 'O' - REFER OFFICAL COMMENTS D LICENCE OR IDENTITY CARD    */ 00840000
+            7 FICR2_POI_SECONDARY_ID_TYPE     CHAR (1),                 00850000
+                                                  /* M/C/V/I/B/S/F/O */ 00860000
+            7 FICR2_POI_MC_CARD_NO              CHAR (15),              00870000
+            7 FICR2_POI_MC_NAME                 CHAR (31),              00880000
+            7 FICR2_POI_MC_NAME_POSN            CHAR (1),               00890000
+            7 FICR2_POI_MC_EXPIRY               CHAR (6), /* MMYYYY */  00900000
+            7 FICR2_POI_CL_CARD_NO              CHAR (20),              00910000
+            7 FICR2_POI_DVA_CARD_NO             CHAR (20),              00920000
+            7 FICR2_POI_IMMI_CARD_NO            CHAR (20),              00930000
+            7 FICR2_POI_SEC_OFF_USE_COMMENTS(2) CHAR (30),              00940000
+          5 FICR2_PARENT_CONSENT (2),                                   00950000
+            7 FICR2_PARENT_CONSENT_FLAGS,                               00960000
+              9 FICR2_CHILD_COURT_ORDERS        BIT (1),                00970000
+              9 FICR2_CHILD_NAME_CHK_BOX        BIT (1),                00980000
+              9 FICR2_PARENT_NAME_CHK_BOX       BIT (1),                00990000
+              9 FICR2_PARENT_HELD_PPT           BIT (1),                01000000
+              9 FICR2_PARENT_CHILD_SAME_ADDR    BIT (1),                01010000
+              9 FICR2_PARENT_SIGNED             BIT (1),                01020000
+              9 FICR2_PARENT_ADDRESS_CHK_BOX    BIT (1),                01030000
+              9 FICR2_PARENT_DECL_AND_CONSENT   BIT (1),                01040000
+              9 FICR2_WITNESS_SIGNED            BIT (1),                01050000
+              9 FICR2_LODGED_BY_PARENT          BIT (1),                01060000
+              9 FICR2_PARENT_ID_CHECKED         BIT (1),                01070000
+              9 FICR2_PARENT_ID_COPY            BIT (1),                01080000
+              9 FICR2_PARENT_PHONED             BIT (1),                01090000
+              9 FICR2_PC_SPARE_FLAGS            BIT (3),                01100000
+            7 FICR2_CHILD_FAMILY_NAME           CHAR (31),              01110000
+            7 FICR2_CHILD_GIVEN_NAMES           CHAR (31),              01120000
+            7 FICR2_PARENT_CBC_FAMILY_NAME      CHAR (31),              01130000
+            7 FICR2_PARENT_CBC_GIVEN_NAMES      CHAR (31),              01140000
+            7 FICR2_PARENT_CURR_FAMILY_NAME     CHAR (31),              01150000
+            7 FICR2_PARENT_CURR_GIVEN_NAMES     CHAR (31),              01160000
+            7 FICR2_PARENT_PPT_NUMBER           CHAR (9),               01170000
+            7 FICR2_PARENT_PHONE_1              CHAR (15),              01180000
+            7 FICR2_PARENT_PHONE_2              CHAR (15),              01190000
+            7 FICR2_PARENT_EMAIL                CHAR (60),              01200000
+            7 FICR2_PARENT_ADDR_1               CHAR (30),              01210000
+            7 FICR2_PARENT_ADDR_2               CHAR (30),              01220000
+            7 FICR2_PARENT_TOWN                 CHAR (30),              01230000
+            7 FICR2_PARENT_STATE                CHAR (15),              01240000
+            7 FICR2_PARENT_ZIP                  CHAR (10),              01250000
+            7 FICR2_PARENT_COUNTRY              CHAR (30),              01260000
+            7 FICR2_PARENT_SIGNED_DATE          FIXED DEC (7),          01270000
+            7 FICR2_WITNESS_SIGNED_DATE         FIXED DEC (7),          01280000
+            7 FICR2_WITNESS_NAME                CHAR (31),              01290000
+            7 FICR2_WITNESS_PHONE               CHAR (15),              01300000
+          5 FICR2_REFEREE_DETAILS,                                      01310000
+            7 FICR2_REF_DL_NUMBER               CHAR (14),              01320000
+            7 FICR2_REF_DL_EXPIRY_DATE          FIXED DEC (7),          01330000
+            7 FICR2_REF_DL_STATE                CHAR (3),               01340000
+            7 FICR2_REF_PROFESSION_TYPE         CHAR (30),              01350000
+            7 FICR2_REF_BUSINESS_ADDR (4)       CHAR (30),              01360000
+            7 FICR2_REF_PHONE_1                 CHAR (15),              01370000
+            7 FICR2_REF_PHONE_2                 CHAR (15),              01380000
+            7 FICR2_REF_EMAIL                   CHAR (60),              01390000
+          5 FICR2_APPL_WHO_SIGNED               CHAR (1),  /* A/P/O */  01400000
+          5 FICR2_APPL_SIGNED_FNAME             CHAR (31),              01410000
+          5 FICR2_APPL_SIGNED_GNAME             CHAR (31),              01420000
+          5 FICR2_DELIVERY_MODE                 CHAR (1),  /* R/D/L */  01430000
+          5 FICR2_DESPATCH_AGENT_ID             CHAR (6),               01440000
+          5 FICR2_OS_AUTHORISE_OFFICE           CHAR (4),               01450000
+          5 FICR2_OS_AUTHORISE_OPID             CHAR (4),               01460000
+          5 FICR2_DELIVER_TO_RES                CHAR (1),  /* R/D */    01470000
+          5 FICR2_FILLER_WAS_STATE              CHAR (30),              01480000
+          5 FICR2_RESIDENTIAL_STATE             CHAR (30),              01490000
+          5 FICR2_RESIDENTIAL_ZIP               CHAR (10),              01500000
+          5 FICR2_RESIDENTIAL_COUNTRY           CHAR (30),              01510000
+          5 FICR2_LSD_CITY                      CHAR (30),              01520000
+          5 FICR2_LSD_COUNTRY                   CHAR (30),              01530000
+          5 FICR2_EMERGENCY_EMAIL               CHAR (60),              01540000
+          5 FICR2_EMERGENCY_TOWN                CHAR (30),              01550000
+          5 FICR2_EMERGENCY_STATE               CHAR (30),              01560000
+          5 FICR2_EMERGENCY_ZIP                 CHAR (10),              01570000
+          5 FICR2_EMERGENCY_COUNTRY             CHAR (30),              01580000
+          5 FICR2_TD_TYPE_OTHER_DESC            CHAR (10),              01590000
+          5 FICR2_USER_ID                       CHAR (10),              01600000
+                                                                        01610000
+          5 FICR2_HUMUNGOUS_FILLER       CHAR (834);                    01620000
+                                                                        01630000
+                                                                                
