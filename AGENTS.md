@@ -1,0 +1,15 @@
+# AGENTS.md
+
+This file provides guidance to agents when working with code in this repository.
+
+- The DBB config is not aligned to this repo layout: [`application-conf/application.properties`](application-conf/application.properties) and [`application-conf/file.properties`](application-conf/file.properties) still point at `cics-genapp/...` paths, while the real sources here are in [`SOURCE/`](SOURCE/) and [`COPYLIB/`](COPYLIB/). Do not assume the checked-in DBB properties can build this clone as-is.
+- There are no local build/lint/test commands in the repo. Builds are intended for z/OS DBB only; [`application-conf/application.properties`](application-conf/application.properties) sets `runzTests=True`, so zUnit execution is expected as part of the remote build rather than via a separate local command.
+- Single-test execution is also not defined locally. [`application-conf/file.properties`](application-conf/file.properties) maps zUnit only through `cics-genapp/zUnit/testcfg/*.bzucfg` and `cics-genapp/zUnit/testcase/*.cbl`, but those directories are absent from this repository snapshot.
+- Copybook resolution is a hidden dependency: COBOL sources use bare `COPY` names (for example [`COPY WHOAMIWS`](SOURCE/WHOAMI:18) and [`COPY WHOAMILK`](SOURCE/WHOAMI:21)), so any build or analysis flow must make [`COPYLIB/`](COPYLIB/) available as the copybook library.
+- DB2 programs rely on generated DCLGEN copybooks in [`COPYLIB/`](COPYLIB/) rather than inline structures. Example: [`DB2ARCH`](SOURCE/DB2ARCH:66) includes [`DGIMMUNI`](COPYLIB/DGIMMUNI), and [`ORGREP`](SOURCE/ORGREP:19) includes `SQLCA` plus an inline row layout instead of copying a local schema copybook.
+- SQL handling is verbose by convention: statements are followed by explicit SQLCODE checks or a shared paragraph such as [`800-SQL-Return-Codes`](SOURCE/DB2ARCH:148); preserve that pattern instead of collapsing multiple SQL operations into one unchecked block.
+- Paragraph naming is project-specific and consistent: examples include numeric prefixes like [`000-Housekeeping`](SOURCE/DB2ARCH:81), [`500-Immunisation-Insert`](SOURCE/DB2ARCH:127), [`1000-...`](CLAUDE.md) style sections, and hyphenated action names rather than generic `main`/`helper`.
+- Callable COBOL modules use explicit linkage contracts and often terminate with [`GOBACK`](SOURCE/CHKCODE:38); for example [`CHKCODE`](SOURCE/CHKCODE:27) is invoked from [`TOURFILE`](SOURCE/TOURFILE:104) with positional parameters, so parameter order must not change.
+- [`WHOAMI`](SOURCE/WHOAMI:32) depends on low-level z/OS control-block copybooks [`WHOAMILK`](COPYLIB/WHOAMILK) and [`WHOAMIWS`](COPYLIB/WHOAMIWS); treat these as layout-sensitive structures, not normal business-record copybooks.
+- Dataset attributes are part of the repo contract: [`zGIT-DS-Attributes`](zGIT-DS-Attributes) declares `SOURCE` and `COPYLIB` as `PDSE FB 80 32720`, so avoid edits that assume LF-delimited workstation formatting is the canonical deployment format.
+- [`CLAUDE.md`](CLAUDE.md) already captures the intended repository overview and should be treated as an additional agent rule source when summarizing architecture or conventions.
