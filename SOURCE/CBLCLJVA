@@ -1,6 +1,6 @@
-       PROCESS THREAD,TEST,SOURCE
+       PROCESS THREAD,DLL,TEST,SOURCE
        IDENTIFICATION DIVISION.
-       PROGRAM-ID. CBLCLJVA.
+       PROGRAM-ID. CBLCLJVA RECURSIVE.
        AUTHOR. BENJAMIN THOMPSON.
        DATE-WRITTEN. 2026-05-23.
        DATE-COMPILED.
@@ -30,6 +30,7 @@
        01 WS-JVM-VERSION     PIC S9(9) COMP-5.
        01 WS-INPUT-STR       PIC X(30)
                              VALUE "hello from cobol".
+       01 WS-UPPER-STR       PIC X(30).
       *
        01 WS-DISP-N          PIC Z9.
        01 WS-DISP-FIB        PIC ZZZ9.
@@ -76,7 +77,9 @@
            DISPLAY "--- Demo 2: EBCDIC String Processing via Java ---"
            DISPLAY "Before: [" WS-INPUT-STR "]"
            INVOKE WS-HELPER-OBJ "toUpperCase"
-               USING BY REFERENCE WS-INPUT-STR
+               USING BY VALUE WS-INPUT-STR
+               RETURNING WS-UPPER-STR
+           MOVE WS-UPPER-STR TO WS-INPUT-STR
            DISPLAY "After:  [" WS-INPUT-STR "]"
            .
       *

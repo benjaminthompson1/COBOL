@@ -54,14 +54,15 @@ public class CobolHelper {
      *   INVOKE WS-HELPER-OBJ "toUpperCase"
      *       USING BY REFERENCE WS-INPUT-STR   (PIC X(30))
      */
-    public void toUpperCase(byte[] data) {
+    public byte[] toUpperCase(byte[] data) {
         String s = new String(data, EBCDIC);
         System.out.println("CobolHelper.toUpperCase: input=[" + s.trim() + "]");
-        String upper = s.toUpperCase();
-        byte[] upperBytes = upper.getBytes(EBCDIC);
-        Arrays.fill(data, (byte) 0x40);                                  // EBCDIC space
-        System.arraycopy(upperBytes, 0, data, 0,
-                         Math.min(upperBytes.length, data.length));
+        byte[] result = new byte[data.length];
+        Arrays.fill(result, (byte) 0x40);
+        byte[] upperBytes = s.toUpperCase().getBytes(EBCDIC);
+        System.arraycopy(upperBytes, 0, result, 0,
+                         Math.min(upperBytes.length, result.length));
+        return result;
     }
 
     /**
