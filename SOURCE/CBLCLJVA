@@ -1,0 +1,98 @@
+       PROCESS THREAD,TEST,SOURCE
+       IDENTIFICATION DIVISION.
+       PROGRAM-ID. CBLCLJVA.
+       AUTHOR. BENJAMIN THOMPSON.
+       DATE-WRITTEN. 2026-05-23.
+       DATE-COMPILED.
+      *
+      * CBLCLJVA - COBOL calling Java via OO INVOKE
+      *
+      * Demonstrates Enterprise COBOL 6.5 calling a Java class using
+      * the INVOKE statement and REPOSITORY paragraph.
+      *
+      * Java class: com.ibm.demo.CobolHelper
+      * Location:   /u/ibmuser/cobldemo/classes/
+      * Required compiler option: THREAD
+      *
+       ENVIRONMENT DIVISION.
+       CONFIGURATION SECTION.
+       SOURCE-COMPUTER. Z32A.
+       OBJECT-COMPUTER. Z32A.
+       REPOSITORY.
+           CLASS COB-HELPER AS "com/ibm/demo/CobolHelper".
+      *
+       DATA DIVISION.
+       WORKING-STORAGE SECTION.
+       01 WS-HELPER-OBJ      OBJECT REFERENCE COB-HELPER.
+      *
+       01 WS-FIB-INPUT       PIC S9(9) COMP-5 VALUE 10.
+       01 WS-FIB-RESULT      PIC S9(9) COMP-5.
+       01 WS-JVM-VERSION     PIC S9(9) COMP-5.
+       01 WS-INPUT-STR       PIC X(30)
+                             VALUE "hello from cobol".
+      *
+       01 WS-DISP-N          PIC Z9.
+       01 WS-DISP-FIB        PIC ZZZ9.
+       01 WS-DISP-VER        PIC Z9.
+      *
+       PROCEDURE DIVISION.
+       MAIN-PROCEDURE.
+           PERFORM 1000-INITIALIZE
+           PERFORM 2000-DEMO-FIBONACCI
+           PERFORM 3000-DEMO-STRING
+           PERFORM 4000-DEMO-JVM-VERSION
+           PERFORM 9000-TERMINATE
+           .
+      *
+       1000-INITIALIZE.
+           DISPLAY "============================================"
+           DISPLAY " COBOL-Java Interoperability Demo          "
+           DISPLAY " CBLCLJVA  Enterprise COBOL 6.5 + Java 21  "
+           DISPLAY "============================================"
+           DISPLAY " "
+           INVOKE COB-HELPER "new" RETURNING WS-HELPER-OBJ
+           IF WS-HELPER-OBJ = NULL
+               DISPLAY "ERROR: Failed to create CobolHelper object"
+               MOVE 8 TO RETURN-CODE
+               GOBACK
+           END-IF
+           DISPLAY "Java CobolHelper object created OK"
+           .
+      *
+       2000-DEMO-FIBONACCI.
+           DISPLAY " "
+           DISPLAY "--- Demo 1: Integer Arithmetic via Java ---"
+           INVOKE WS-HELPER-OBJ "fibonacci"
+               USING BY VALUE WS-FIB-INPUT
+               RETURNING WS-FIB-RESULT
+           MOVE WS-FIB-INPUT  TO WS-DISP-N
+           MOVE WS-FIB-RESULT TO WS-DISP-FIB
+           DISPLAY "Fibonacci(" WS-DISP-N ") computed by Java = "
+                   WS-DISP-FIB
+           .
+      *
+       3000-DEMO-STRING.
+           DISPLAY " "
+           DISPLAY "--- Demo 2: EBCDIC String Processing via Java ---"
+           DISPLAY "Before: [" WS-INPUT-STR "]"
+           INVOKE WS-HELPER-OBJ "toUpperCase"
+               USING BY REFERENCE WS-INPUT-STR
+           DISPLAY "After:  [" WS-INPUT-STR "]"
+           .
+      *
+       4000-DEMO-JVM-VERSION.
+           DISPLAY " "
+           DISPLAY "--- Demo 3: JVM Introspection from Java ---"
+           INVOKE WS-HELPER-OBJ "getJvmMajorVersion"
+               RETURNING WS-JVM-VERSION
+           MOVE WS-JVM-VERSION TO WS-DISP-VER
+           DISPLAY "JVM major version running with COBOL: " WS-DISP-VER
+           .
+      *
+       9000-TERMINATE.
+           DISPLAY " "
+           DISPLAY "============================================"
+           DISPLAY " CBLCLJVA completed successfully            "
+           DISPLAY "============================================"
+           GOBACK
+           .

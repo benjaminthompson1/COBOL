@@ -1,0 +1,41 @@
+//CBLCLJVA JOB (FB3),'COBOL-JAVA DEMO',CLASS=A,MSGCLASS=H,
+//         NOTIFY=&SYSUID,REGION=0M,TIME=1440
+//*        TYPRUN=HOLD
+//*--------------------------------------------------------------------*
+//* JOB:   CBLCLJVA
+//* DESC:  Execute CBLCLJVA - COBOL calling Java via OO INVOKE
+//* AUTH:  Ben               DATE: 2026-05-24
+//*
+//* Prerequisites:
+//*   1. CobolHelper.class compiled to USS:
+//*        /u/ibmuser/cobldemo/classes/com/ibm/demo/CobolHelper.class
+//*   2. Load module built by IBMUSER.CNTL(IUCBLCL):
+//*        IBMUSER.GIT.COBOL.LOAD(CBLCLJVA)
+//*
+//* Output DDs:
+//*   SYSOUT - COBOL DISPLAY statements
+//*   STDOUT - Java System.out.println lines
+//*   STDERR - Java System.err.println lines
+//*   CEEDUMP- LE diagnostic dump (on abend)
+//*--------------------------------------------------------------------*
+//STEP1    EXEC PGM=CBLCLJVA
+//STEPLIB  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.LOAD
+//         DD DISP=SHR,DSN=CEE.SCEERUN
+//*
+//* CEEOPTS passes environment variables to Language Environment.
+//* LE uses JAVA_HOME to locate and initialise the JVM on the first
+//* INVOKE call.  CLASSPATH must be the root above com/ibm/demo/ so
+//* that the JVM resolves com.ibm.demo.CobolHelper correctly.
+//*
+//CEEOPTS  DD *
+ENVAR("JAVA_HOME=/usr/lpp/java/J21.0_64",
+      "CLASSPATH=/u/ibmuser/cobldemo/classes",
+      "IBM_JAVA_OPTIONS=-Xms64m -Xmx512m")
+/*
+//SYSOUT   DD SYSOUT=*
+//STDOUT   DD SYSOUT=*
+//STDERR   DD SYSOUT=*
+//CEEDUMP  DD SYSOUT=*
+//*--------------------------------------------------------------------*
+//* End of Job
+//*--------------------------------------------------------------------*

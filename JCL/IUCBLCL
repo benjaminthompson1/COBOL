@@ -1,0 +1,31 @@
+//IUCBLCL JOB (FB3),'CBLCLJVA COMP-BIND',CLASS=A,MSGCLASS=H,
+//        NOTIFY=&SYSUID,REGION=0M,TIME=1440
+//*       TYPRUN=HOLD
+//*--------------------------------------------------------------------*
+//* JOB:   IUCBLCL
+//* DESC:  Compile and bind CBLCLJVA - COBOL calling Java via OO INVOKE
+//* AUTH:  Ben               DATE: 2026-05-24
+//*
+//* The THREAD compiler option is specified via the PROCESS card in
+//* CBLCLJVA source - no PARM override required here.  IGYQCB's
+//* bind step applies RENT by default, which is required for all
+//* programs compiled with THREAD.
+//*
+//* Prerequisites:
+//*   IBMUSER.GIT.COBOL.SOURCE(CBLCLJVA) - source loaded from git
+//*   IBMUSER.GIT.COBOL.OBJECT           - object deck PDS (pre-exists)
+//*   IBMUSER.GIT.COBOL.LOAD             - load library   (pre-exists)
+//*--------------------------------------------------------------------*
+//COBCB1 EXEC IGYQCB,
+//            LNGPRFX=IGY650,
+//            LIBPRF1=CEE,
+//            GOPGM=CBLCLJVA
+//COBOL.SYSLIB DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.COPYLIB
+//COBOL.SYSIN  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.SOURCE(CBLCLJVA)
+//COBOL.SYSLIN DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.OBJECT(CBLCLJVA)
+//BIND.SYSLIB  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.LOAD
+//BIND.SYSLIN  DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.OBJECT(CBLCLJVA)
+//BIND.SYSLMOD DD DISP=SHR,DSN=IBMUSER.GIT.COBOL.LOAD(CBLCLJVA)
+//*--------------------------------------------------------------------*
+//* End of Job
+//*--------------------------------------------------------------------*
