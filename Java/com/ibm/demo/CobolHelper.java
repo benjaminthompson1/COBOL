@@ -8,9 +8,9 @@
  *   2. byte[] in-place      toUpperCase(byte[])
  *   3. int out, no input    getJvmMajorVersion()
  *
- * USS location: /u/ibmuser/cobldemo/com/ibm/demo/CobolHelper.java
- * Compile:      javac -d /u/ibmuser/cobldemo/classes \
- *                        /u/ibmuser/cobldemo/com/ibm/demo/CobolHelper.java
+ * USS location: /u/ibmuser/cobjava/com/ibm/demo/CobolHelper.java
+ * Compile:      javac -d /u/ibmuser/cobjava/classes \
+ *                        /u/ibmuser/cobjava/com/ibm/demo/CobolHelper.java
  *
  * Called by:    SOURCE/CBLCLJVA  (COBOL, compiled with THREAD option)
  */
@@ -44,15 +44,15 @@ public class CobolHelper {
     }
 
     /**
-     * Upper-cases EBCDIC bytes in-place.
+     * Upper-cases EBCDIC bytes and returns a new byte array.
      *
-     * COBOL passes PIC X(30) BY REFERENCE; Java receives the raw EBCDIC
-     * byte array.  Modifications are written back into COBOL working
-     * storage because BY REFERENCE passes the storage address directly.
+     * COBOL passes PIC X(30) BY VALUE and receives the result via RETURNING.
+     * The returned byte[] is copied by LE into WS-UPPER-STR (PIC X(30)).
      *
      * COBOL mapping:
      *   INVOKE WS-HELPER-OBJ "toUpperCase"
-     *       USING BY REFERENCE WS-INPUT-STR   (PIC X(30))
+     *       USING BY VALUE WS-INPUT-STR       (PIC X(30))
+     *       RETURNING WS-UPPER-STR            (PIC X(30))
      */
     public byte[] toUpperCase(byte[] data) {
         String s = new String(data, EBCDIC);

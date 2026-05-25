@@ -1,15 +1,15 @@
-//CBLCLJVA JOB (FB3),'COBOL-JAVA DEMO',CLASS=A,MSGCLASS=H,
+//CLJVARUN JOB (FB3),'COBOL-JAVA DEMO',CLASS=A,MSGCLASS=H,
 //         NOTIFY=&SYSUID,REGION=0M,TIME=1440
 //*        TYPRUN=HOLD
 //*--------------------------------------------------------------------*
-//* JOB:   CBLCLJVA
+//* JOB:   CLJVARUN
 //* DESC:  Execute CBLCLJVA - COBOL calling Java via OO INVOKE
 //* AUTH:  Ben               DATE: 2026-05-24
 //*
 //* Prerequisites:
-//*   1. CobolHelper.class compiled to USS:
-//*        /u/ibmuser/cobldemo/classes/com/ibm/demo/CobolHelper.class
-//*   2. Load module built by IBMUSER.CNTL(IUCBLCL):
+//*   1. CobolHelper.class built by JCL/CLJVAJB:
+//*        /u/ibmuser/cobjava/classes/com/ibm/demo/CobolHelper.class
+//*   2. Load module built by JCL/CLJVACB:
 //*        IBMUSER.GIT.COBOL.LOAD(CBLCLJVA)
 //*
 //* Output DDs:
@@ -29,7 +29,7 @@
 //*
 //CEEOPTS  DD *
 ENVAR("JAVA_HOME=/usr/lpp/java/J21.0_64",
-      "CLASSPATH=/u/ibmuser/cobldemo/classes",
+      "CLASSPATH=/u/ibmuser/cobjava/classes",
       "IBM_JAVA_OPTIONS=-Xms64m -Xmx512m")
 /*
 //SYSOUT   DD SYSOUT=*

@@ -1,0 +1,39 @@
+//CLJVAJB  JOB (FB3),'JAVA BUILD',CLASS=A,MSGCLASS=H,
+//         NOTIFY=&SYSUID,REGION=0M,TIME=1440
+//*        TYPRUN=HOLD
+//*--------------------------------------------------------------------*
+//* JOB:   CLJVAJB
+//* DESC:  Copy CobolHelper.java from zGit USS clone and compile it
+//* AUTH:  Ben               DATE: 2026-05-25
+//*
+//*   Source (zGit working tree):
+//*     /u/ibmuser/zGit-Repositories/IBMUSER/GIT/COBOL/
+//*       Java/com/ibm/demo/CobolHelper.java
+//*
+//*   Staged to (javac source root):
+//*     /u/ibmuser/cobjava/com/ibm/demo/CobolHelper.java
+//*
+//*   Compiled output:
+//*     /u/ibmuser/cobjava/classes/com/ibm/demo/CobolHelper.class
+//*
+//* Run this job before CLJVARUN whenever CobolHelper.java changes.
+//*--------------------------------------------------------------------*
+//JAVABLD  EXEC PGM=BPXBATCH
+//STDOUT   DD SYSOUT=*
+//STDERR   DD SYSOUT=*
+//STDPARM  DD *
+SH set -e
+GITJAVA=/u/ibmuser/zGit-Repositories/IBMUSER/GIT/COBOL/Java/com/ibm/demo
+SRCDIR=/u/ibmuser/cobjava/com/ibm/demo
+CLSDIR=/u/ibmuser/cobjava/classes
+JAVAC=/usr/lpp/java/J21.0_64/bin/javac
+mkdir -p $SRCDIR
+mkdir -p $CLSDIR
+cp $GITJAVA/CobolHelper.java $SRCDIR/CobolHelper.java
+echo "Copied CobolHelper.java to $SRCDIR"
+$JAVAC -d $CLSDIR $SRCDIR/CobolHelper.java
+echo "Compiled: $CLSDIR/com/ibm/demo/CobolHelper.class"
+/*
+//*--------------------------------------------------------------------*
+//* End of Job
+//*--------------------------------------------------------------------*

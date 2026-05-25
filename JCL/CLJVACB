@@ -1,8 +1,8 @@
-//IUCBLCL JOB (FB3),'CBLCLJVA COMP-BIND',CLASS=A,MSGCLASS=H,
-//        NOTIFY=&SYSUID,REGION=0M,TIME=1440
-//*       TYPRUN=HOLD
+//CLJVACB  JOB (FB3),'CBLCLJVA COMP-BIND',CLASS=A,MSGCLASS=H,
+//         NOTIFY=&SYSUID,REGION=0M,TIME=1440
+//*        TYPRUN=HOLD
 //*--------------------------------------------------------------------*
-//* JOB:   IUCBLCL
+//* JOB:   CLJVACB
 //* DESC:  Compile and bind CBLCLJVA - COBOL calling Java via OO INVOKE
 //* AUTH:  Ben               DATE: 2026-05-24
 //*
