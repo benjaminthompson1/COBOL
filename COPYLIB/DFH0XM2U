@@ -1,0 +1,97 @@
+      ******************************************************************        
+      *                                                                *        
+      * CONTROL BLOCK NAME = DFH0XM2U                                  *        
+      *                                                                *        
+      * DESCRIPTIVE NAME = CICS TS  (Samples) Example Application -    *        
+      *                     Copybook for BMS mapsets for inquire list  *        
+      *                                                                *        
+      *                                                                *        
+      *                                                                *        
+      *      Licensed Materials - Property of IBM                      *        
+      *                                                                *        
+      *      "Restricted Materials of IBM"                             *        
+      *                                                                *        
+      *      5655-YA1                                                  *        
+      *                                                                *        
+      *      (C) Copyright IBM Corp. 2004"                             *        
+      *                                                                *        
+      *                                                                *        
+      *                                                                *        
+      *                                                                *        
+      * STATUS = 7.6.0                                                 *        
+      *                                                                *        
+      * FUNCTION =                                                     *        
+      *      This copy book is part of the example application &       *        
+      *      defines the data passed to & from the BMS mapsets for the *        
+      *      inquire list panel. It has *been edited from the generated*        
+      *      to include an indexed array structure for ease of         *        
+      *      copybook programming                                      *        
+      *                                                                *        
+      *----------------------------------------------------------------*        
+      *                                                                *        
+      * CHANGE ACTIVITY :                                              *        
+      *      $SEG(DFH0XM2U),COMP(SAMPLES),PROD(CICS TS ):              *        
+      *                                                                *        
+      *   PN= REASON REL YYMMDD HDXXIII : REMARKS                      *        
+      *   $D0= I07544 640 040910 HDIPCB  : EXAMPLE - BASE APPLICATION  *        
+      *                                                                *        
+      ******************************************************************        
+                                                                                
+      * Custom CopyBook for Example Inquire BMS Map                             
+       01  EXINQCI.                                                             
+           03 FILLER PIC X(12).                                                 
+           03 CATALOG-ITEM-IN OCCURS 15 TIMES.                                  
+               05 INQ-ITEMREFL    COMP  PIC  S9(4).                             
+               05 INQ-ITEMREFF    PICTURE X.                                    
+               05 FILLER REDEFINES INQ-ITEMREFF.                                
+                   09 INQ-ITEMREFA    PICTURE X.                                
+               05 FILLER   PICTURE X(2).                                        
+               05 INQ-ITEMREFI  PIC X(4).                                       
+               05 INQ-DESCL    COMP  PIC  S9(4).                                
+               05 INQ-DESCF    PICTURE X.                                       
+               05 FILLER REDEFINES INQ-DESCF.                                   
+                   09 INQ-DESCA    PICTURE X.                                   
+               05 FILLER   PICTURE X(2).                                        
+               05 INQ-DESCI  PIC X(40).                                         
+               05 INQ-COSTL    COMP  PIC  S9(4).                                
+               05 INQ-COSTF    PICTURE X.                                       
+               05 FILLER REDEFINES INQ-COSTF.                                   
+                   09 INQ-COSTA    PICTURE X.                                   
+               05 FILLER   PICTURE X(2).                                        
+               05 INQ-COSTI  PIC X(6).                                          
+               05 INQ-ORDL    COMP  PIC  S9(4).                                 
+               05 INQ-ORDF    PICTURE X.                                        
+               05 FILLER REDEFINES INQ-ORDF.                                    
+                   09 INQ-ORDA    PICTURE X.                                    
+               05 FILLER   PICTURE X(2).                                        
+               05 INQ-ORDI  PIC X(1).                                           
+                                                                                
+           03 INQC-MSGL    COMP  PIC  S9(4).                                    
+           03 INQC-MSGF    PICTURE X.                                           
+           03 FILLER REDEFINES INQC-MSGF.                                       
+               05 INQC-MSGA    PICTURE X.                                       
+           03 FILLER   PICTURE X(2).                                            
+           03 INQC-MSGI  PIC X(79).                                             
+       01  EXINQCO REDEFINES EXINQCI.                                           
+           03  FILLER PIC X(12).                                                
+           03  CATALOG-ITEM-OUT OCCURS 15 TIMES.                                
+               05  FILLER PICTURE X(3).                                         
+               05  INQ-ITEMREFC    PICTURE X.                                   
+               05  INQ-ITEMREFH    PICTURE X.                                   
+               05  INQ-ITEMREFO  PIC X(4).                                      
+               05  FILLER PICTURE X(3).                                         
+               05  INQ-DESCC    PICTURE X.                                      
+               05  INQ-DESCH    PICTURE X.                                      
+               05  INQ-DESCO  PIC X(40).                                        
+               05  FILLER PICTURE X(3).                                         
+               05  INQ-COSTC    PICTURE X.                                      
+               05  INQ-COSTH    PICTURE X.                                      
+               05  INQ-COSTO PIC X(6).                                          
+               05  FILLER PICTURE X(3).                                         
+               05  INQ-ORDC    PICTURE X.                                       
+               05  INQ-ORDH    PICTURE X.                                       
+               05  INQ-ORDO  PIC X(1).                                          
+           03  FILLER PICTURE X(3).                                             
+           03  INQC-MSGC    PICTURE X.                                          
+           03  INQC-MSGH    PICTURE X.                                          
+           03  INQC-MSGO  PIC X(79).                                            

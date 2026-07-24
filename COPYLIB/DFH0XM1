@@ -1,0 +1,164 @@
+      ******************************************************************        
+      *                                                                *        
+      * CONTROL BLOCK NAME = DFH0XM1                                   *        
+      *                                                                *        
+      * DESCRIPTIVE NAME = CICS TS  (Samples) Example Application -    *        
+      *                     Copybook for BMS mapsets for menu and order*        
+      *                                                                *        
+      *                                                                *        
+      *                                                                *        
+      *      Licensed Materials - Property of IBM                      *        
+      *                                                                *        
+      *      "Restricted Materials of IBM"                             *        
+      *                                                                *        
+      *      5655-YA1                                                  *        
+      *                                                                *        
+      *      (C) Copyright IBM Corp. 2004"                             *        
+      *                                                                *        
+      *                                                                *        
+      *                                                                *        
+      *                                                                *        
+      * STATUS = 7.6.0                                                 *        
+      *                                                                *        
+      * FUNCTION =                                                     *        
+      *      This copy book is part of the example application and     *        
+      *      the data passed to and from the BMS mapsets for the main  *        
+      *      menu and the place order panels                           *        
+      *                                                                *        
+      *----------------------------------------------------------------*        
+      *                                                                *        
+      * CHANGE ACTIVITY :                                              *        
+      *      $SEG(DFH0XM1),COMP(SAMPLES),PROD(CICS TS ):               *        
+      *                                                                *        
+      *   PN= REASON REL YYMMDD HDXXIII : REMARKS                      *        
+      *   $D0= I07544 640 040910 HDIPCB  : EXAMPLE - BASE APPLICATION  *        
+      *                                                                *        
+      ******************************************************************        
+       01  EXMENUI.                                                             
+           02  FILLER PIC X(12).                                                
+           02  ACTIONL    COMP  PIC  S9(4).                                     
+           02  ACTIONF    PICTURE X.                                            
+           02  FILLER REDEFINES ACTIONF.                                        
+             03 ACTIONA    PICTURE X.                                           
+           02  FILLER   PICTURE X(2).                                           
+           02  ACTIONI  PIC X(1).                                               
+           02  ITEM-REFL    COMP  PIC  S9(4).                                   
+           02  ITEM-REFF    PICTURE X.                                          
+           02  FILLER REDEFINES ITEM-REFF.                                      
+             03 ITEM-REFA    PICTURE X.                                         
+           02  FILLER   PICTURE X(2).                                           
+           02  ITEM-REFI  PIC X(4).                                             
+           02  MSG1L    COMP  PIC  S9(4).                                       
+           02  MSG1F    PICTURE X.                                              
+           02  FILLER REDEFINES MSG1F.                                          
+             03 MSG1A    PICTURE X.                                             
+           02  FILLER   PICTURE X(2).                                           
+           02  MSG1I  PIC X(79).                                                
+       01  EXMENUO REDEFINES EXMENUI.                                           
+           02  FILLER PIC X(12).                                                
+           02  FILLER PICTURE X(3).                                             
+           02  ACTIONC    PICTURE X.                                            
+           02  ACTIONH    PICTURE X.                                            
+           02  ACTIONO  PIC X(1).                                               
+           02  FILLER PICTURE X(3).                                             
+           02  ITEM-REFC    PICTURE X.                                          
+           02  ITEM-REFH    PICTURE X.                                          
+           02  ITEM-REFO  PIC X(4).                                             
+           02  FILLER PICTURE X(3).                                             
+           02  MSG1C    PICTURE X.                                              
+           02  MSG1H    PICTURE X.                                              
+           02  MSG1O  PIC X(79).                                                
+       01  EXORDRI.                                                             
+           02  FILLER PIC X(12).                                                
+           02  ORDR-ITEMREFL    COMP  PIC  S9(4).                               
+           02  ORDR-ITEMREFF    PICTURE X.                                      
+           02  FILLER REDEFINES ORDR-ITEMREFF.                                  
+             03 ORDR-ITEMREFA    PICTURE X.                                     
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-ITEMREFI  PIC X(4).                                         
+           02  ORDR-DESCL    COMP  PIC  S9(4).                                  
+           02  ORDR-DESCF    PICTURE X.                                         
+           02  FILLER REDEFINES ORDR-DESCF.                                     
+             03 ORDR-DESCA    PICTURE X.                                        
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-DESCI  PIC X(40).                                           
+           02  ORDR-COSTL    COMP  PIC  S9(4).                                  
+           02  ORDR-COSTF    PICTURE X.                                         
+           02  FILLER REDEFINES ORDR-COSTF.                                     
+             03 ORDR-COSTA    PICTURE X.                                        
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-COSTI  PIC X(6).                                            
+           02  ORDR-STKL    COMP  PIC  S9(4).                                   
+           02  ORDR-STKF    PICTURE X.                                          
+           02  FILLER REDEFINES ORDR-STKF.                                      
+             03 ORDR-STKA    PICTURE X.                                         
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-STKI  PIC X(4).                                             
+           02  ORDR-ORDL    COMP  PIC  S9(4).                                   
+           02  ORDR-ORDF    PICTURE X.                                          
+           02  FILLER REDEFINES ORDR-ORDF.                                      
+             03 ORDR-ORDA    PICTURE X.                                         
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-ORDI  PIC X(3).                                             
+           02  ORDR-QUANTITYL    COMP  PIC  S9(4).                              
+           02  ORDR-QUANTITYF    PICTURE X.                                     
+           02  FILLER REDEFINES ORDR-QUANTITYF.                                 
+             03 ORDR-QUANTITYA    PICTURE X.                                    
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-QUANTITYI  PIC X(3).                                        
+           02  ORDR-USERIDL    COMP  PIC  S9(4).                                
+           02  ORDR-USERIDF    PICTURE X.                                       
+           02  FILLER REDEFINES ORDR-USERIDF.                                   
+             03 ORDR-USERIDA    PICTURE X.                                      
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-USERIDI  PIC X(8).                                          
+           02  ORDR-DEPTL    COMP  PIC  S9(4).                                  
+           02  ORDR-DEPTF    PICTURE X.                                         
+           02  FILLER REDEFINES ORDR-DEPTF.                                     
+             03 ORDR-DEPTA    PICTURE X.                                        
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-DEPTI  PIC X(8).                                            
+           02  ORDR-MSGL    COMP  PIC  S9(4).                                   
+           02  ORDR-MSGF    PICTURE X.                                          
+           02  FILLER REDEFINES ORDR-MSGF.                                      
+             03 ORDR-MSGA    PICTURE X.                                         
+           02  FILLER   PICTURE X(2).                                           
+           02  ORDR-MSGI  PIC X(79).                                            
+       01  EXORDRO REDEFINES EXORDRI.                                           
+           02  FILLER PIC X(12).                                                
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-ITEMREFC    PICTURE X.                                      
+           02  ORDR-ITEMREFH    PICTURE X.                                      
+           02  ORDR-ITEMREFO  PIC X(4).                                         
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-DESCC    PICTURE X.                                         
+           02  ORDR-DESCH    PICTURE X.                                         
+           02  ORDR-DESCO  PIC X(40).                                           
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-COSTC    PICTURE X.                                         
+           02  ORDR-COSTH    PICTURE X.                                         
+           02  ORDR-COSTO  PIC X(6).                                            
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-STKC    PICTURE X.                                          
+           02  ORDR-STKH    PICTURE X.                                          
+           02  ORDR-STKO  PIC X(4).                                             
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-ORDC    PICTURE X.                                          
+           02  ORDR-ORDH    PICTURE X.                                          
+           02  ORDR-ORDO  PIC X(3).                                             
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-QUANTITYC    PICTURE X.                                     
+           02  ORDR-QUANTITYH    PICTURE X.                                     
+           02  ORDR-QUANTITYO  PIC X(3).                                        
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-USERIDC    PICTURE X.                                       
+           02  ORDR-USERIDH    PICTURE X.                                       
+           02  ORDR-USERIDO  PIC X(8).                                          
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-DEPTC    PICTURE X.                                         
+           02  ORDR-DEPTH    PICTURE X.                                         
+           02  ORDR-DEPTO  PIC X(8).                                            
+           02  FILLER PICTURE X(3).                                             
+           02  ORDR-MSGC    PICTURE X.                                          
+           02  ORDR-MSGH    PICTURE X.                                          
+           02  ORDR-MSGO  PIC X(79).                                            
